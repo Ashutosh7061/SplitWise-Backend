@@ -30,6 +30,7 @@ It helps users manage shared expenses, calculate balances, and generate simplifi
 ---
 
 ## 📂 Project Structure
+```text
 com.ashutosh.Splitwise
 │
 ├── Controller
@@ -46,5 +47,5 @@ com.ashutosh.Splitwise
 │   └── SettlementData.java
 │
 └── SplitwiseApplication.java
-
+```
 
