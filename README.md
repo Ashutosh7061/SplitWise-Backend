@@ -30,4 +30,21 @@ It helps users manage shared expenses, calculate balances, and generate simplifi
 ---
 
 ## 📂 Project Structure
+com.ashutosh.Splitwise
+│
+├── Controller
+│   └── ExpenseController.java
+│
+├── Service
+│   └── ExpenseService.java
+│
+├── Repository
+│   └── ExpenseRepository.java
+│
+├── Entity
+│   ├── Expense.java
+│   └── SettlementData.java
+│
+└── SplitwiseApplication.java
+
 
