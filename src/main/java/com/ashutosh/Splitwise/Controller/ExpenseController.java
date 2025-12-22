@@ -1,6 +1,7 @@
 package com.ashutosh.Splitwise.Controller;
 
 
+import com.ashutosh.Splitwise.Dto.SettlementDataDto;
 import com.ashutosh.Splitwise.Entity.Expense;
 import com.ashutosh.Splitwise.Entity.SettlementData;
 import com.ashutosh.Splitwise.Repository.ExpenseRepository;
@@ -24,10 +25,10 @@ public class ExpenseController {
     }
 
     @PostMapping("/balances/{groupId}")
-    public List<SettlementData> getBalances(
+    public List<SettlementDataDto> getBalances(
             @PathVariable Long groupId,
-            @RequestBody List<Long> userIds) {
-
+            @RequestBody List<Long> userIds
+    ) {
         return expenseService.calculateBalances(groupId, userIds);
     }
 

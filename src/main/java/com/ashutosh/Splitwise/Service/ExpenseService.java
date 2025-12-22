@@ -1,9 +1,13 @@
 package com.ashutosh.Splitwise.Service;
 
+import com.ashutosh.Splitwise.Dto.SettlementDataDto;
 import com.ashutosh.Splitwise.Entity.Expense;
+import com.ashutosh.Splitwise.Entity.User;
 import com.ashutosh.Splitwise.Entity.SettlementData;
 import com.ashutosh.Splitwise.Repository.ExpenseRepository;
+import com.ashutosh.Splitwise.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,16 +17,19 @@ import java.util.*;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
+    private final UserRepository userRepository;
 
     public Expense addExpense(Expense expense) {
         return expenseRepository.save(expense);
     }
 
     // MAIN BALANCE LOGIC
-    public List<SettlementData> calculateBalances(Long groupId, List<Long> userIds) {
+    public List<SettlementDataDto> calculateBalances(Long groupId, List<Long> userIds) {
 
         List<Expense> expenses = expenseRepository.findByGroupId(groupId);
         Map<Long, Double> netBalance = new HashMap<>();
+
+        Map<Long, String> userNameMap = getUserNameMap(userIds);
 
         for (Long userId : userIds) {
             netBalance.put(userId, 0.0);
@@ -39,7 +46,7 @@ public class ExpenseService {
                 percentageSplit(expense, netBalance);
             }
         }
-        return simplifyBalances(netBalance);
+        return simplifyBalances(netBalance, userNameMap);
     }
 
 
@@ -96,7 +103,7 @@ public class ExpenseService {
 
 
     // -------- SIMPLIFY BALANCES --------
-    private List<SettlementData> simplifyBalances(Map<Long, Double> netBalance) {
+    private List<SettlementDataDto> simplifyBalances(Map<Long, Double> netBalance,Map<Long, String> userNameMap ){
 
         List<Long> creditors = new ArrayList<>();
         List<Long> debtors = new ArrayList<>();
@@ -106,7 +113,7 @@ public class ExpenseService {
             if (entry.getValue() < 0) debtors.add(entry.getKey());
         }
 
-        List<SettlementData> settlements = new ArrayList<>();
+        List<SettlementDataDto> settlements = new ArrayList<>();
 
         int i = 0, j = 0;
 
@@ -118,9 +125,9 @@ public class ExpenseService {
                     netBalance.get(creditor)
             );
             settlements.add(
-                    new SettlementData(
-                            "User " + debtor,
-                            "User " + creditor,
+                    new SettlementDataDto(
+                            userNameMap.get(debtor),
+                            userNameMap.get(creditor),
                             owe
                     )
             );
@@ -157,4 +164,18 @@ public class ExpenseService {
         }
         return map;
     }
+
+    // ------- CREATE A METHOD TO MAP USER to NAME --------
+
+    private Map<Long, String> getUserNameMap(List<Long> userIds) {
+
+        Map<Long, String> map = new HashMap<>();
+        List<com.ashutosh.Splitwise.Entity.User> users = userRepository.findAllById(userIds);
+
+        for (User user : users) {
+            map.put(user.getId(), user.getName());
+        }
+        return map;
+    }
+
 }
