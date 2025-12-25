@@ -2,9 +2,11 @@ package com.ashutosh.Splitwise.Service;
 
 import com.ashutosh.Splitwise.Dto.SettlementDataDto;
 import com.ashutosh.Splitwise.Entity.Expense;
+import com.ashutosh.Splitwise.Entity.Settlement;
 import com.ashutosh.Splitwise.Entity.User;
 import com.ashutosh.Splitwise.Entity.SettlementData;
 import com.ashutosh.Splitwise.Repository.ExpenseRepository;
+import com.ashutosh.Splitwise.Repository.SettlementRepository;
 import com.ashutosh.Splitwise.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,7 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
+    private final SettlementRepository settlementRepository;
 
     public Expense addExpense(Expense expense) {
         return expenseRepository.save(expense);
@@ -103,27 +106,49 @@ public class ExpenseService {
 
 
     // -------- SIMPLIFY BALANCES --------
-    private List<SettlementDataDto> simplifyBalances(Map<Long, Double> netBalance,Map<Long, String> userNameMap ){
+    private List<SettlementDataDto> simplifyBalances(
+            Map<Long, Double> netBalance,
+            Map<Long, String> userNameMap
+    ) {
 
         List<Long> creditors = new ArrayList<>();
         List<Long> debtors = new ArrayList<>();
 
+        // Step 1: Separate creditors and debtors
         for (Map.Entry<Long, Double> entry : netBalance.entrySet()) {
-            if (entry.getValue() > 0) creditors.add(entry.getKey());
-            if (entry.getValue() < 0) debtors.add(entry.getKey());
+            if (entry.getValue() > 0) {
+                creditors.add(entry.getKey());
+            }
+            if (entry.getValue() < 0) {
+                debtors.add(entry.getKey());
+            }
         }
 
         List<SettlementDataDto> settlements = new ArrayList<>();
 
         int i = 0, j = 0;
 
+        // Step 2: Match debtors with creditors
         while (i < debtors.size() && j < creditors.size()) {
+
             Long debtor = debtors.get(i);
             Long creditor = creditors.get(j);
+
             double owe = Math.min(
                     -netBalance.get(debtor),
                     netBalance.get(creditor)
             );
+
+            // Step 3: SAVE settlement in DB (UNPAID)
+            Settlement settlement = new Settlement();
+            settlement.setFromUserId(debtor);
+            settlement.setToUserId(creditor);
+            settlement.setAmount(owe);
+            settlement.setStatus("UNPAID");
+
+            settlementRepository.save(settlement);
+
+            // Step 4: ADD response DTO (for API output)
             settlements.add(
                     new SettlementDataDto(
                             userNameMap.get(debtor),
@@ -132,14 +157,21 @@ public class ExpenseService {
                     )
             );
 
+            // Step 5: Update balances
             netBalance.put(debtor, netBalance.get(debtor) + owe);
             netBalance.put(creditor, netBalance.get(creditor) - owe);
 
-            if (netBalance.get(debtor) == 0) i++;
-            if (netBalance.get(creditor) == 0) j++;
+            if (netBalance.get(debtor) == 0) {
+                i++;
+            }
+            if (netBalance.get(creditor) == 0) {
+                j++;
+            }
         }
+
         return settlements;
     }
+
 
 
 

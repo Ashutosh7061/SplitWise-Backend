@@ -5,19 +5,23 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
-public class User {
+public class Settlement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+
+    private Long fromUserId;
+    private Long toUserId;
+    private double amount;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod preferredPaymentMethod;
+    private PaymentMethod paymentMethod;
 
+    private String status;
 
 
 }
