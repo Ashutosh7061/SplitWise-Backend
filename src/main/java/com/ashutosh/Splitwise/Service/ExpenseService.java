@@ -49,7 +49,7 @@ public class ExpenseService {
                 percentageSplit(expense, netBalance);
             }
         }
-        return simplifyBalances(netBalance, userNameMap);
+        return simplifyBalances(netBalance, userNameMap, groupId);
     }
 
 
@@ -108,7 +108,8 @@ public class ExpenseService {
     // -------- SIMPLIFY BALANCES --------
     private List<SettlementDataDto> simplifyBalances(
             Map<Long, Double> netBalance,
-            Map<Long, String> userNameMap
+            Map<Long, String> userNameMap,
+            Long groupId
     ) {
 
         List<Long> creditors = new ArrayList<>();
@@ -123,11 +124,9 @@ public class ExpenseService {
                 debtors.add(entry.getKey());
             }
         }
-
         List<SettlementDataDto> settlements = new ArrayList<>();
 
         int i = 0, j = 0;
-
         // Step 2: Match debtors with creditors
         while (i < debtors.size() && j < creditors.size()) {
 
@@ -138,16 +137,15 @@ public class ExpenseService {
                     -netBalance.get(debtor),
                     netBalance.get(creditor)
             );
-
             // Step 3: SAVE settlement in DB (UNPAID)
             Settlement settlement = new Settlement();
             settlement.setFromUserId(debtor);
             settlement.setToUserId(creditor);
             settlement.setAmount(owe);
             settlement.setStatus("UNPAID");
+            settlement.setGroupId(groupId);
 
             settlementRepository.save(settlement);
-
             // Step 4: ADD response DTO (for API output)
             settlements.add(
                     new SettlementDataDto(
@@ -156,7 +154,6 @@ public class ExpenseService {
                             owe
                     )
             );
-
             // Step 5: Update balances
             netBalance.put(debtor, netBalance.get(debtor) + owe);
             netBalance.put(creditor, netBalance.get(creditor) - owe);
@@ -168,10 +165,8 @@ public class ExpenseService {
                 j++;
             }
         }
-
         return settlements;
     }
-
 
 
 

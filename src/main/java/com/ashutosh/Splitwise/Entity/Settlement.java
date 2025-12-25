@@ -23,5 +23,7 @@ public class Settlement {
 
     private String status;
 
+    private Long groupId;
+
 
 }
