@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 
 @AllArgsConstructor
 @Getter
@@ -17,5 +19,8 @@ public class SettlementDto {
     private double amount;
     private String status;
     private PaymentMethod receiverPreferredMathod;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime paidAt;
 
 }

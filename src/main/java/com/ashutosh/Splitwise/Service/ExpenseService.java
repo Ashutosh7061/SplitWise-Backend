@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -144,6 +145,7 @@ public class ExpenseService {
             settlement.setAmount(owe);
             settlement.setStatus("UNPAID");
             settlement.setGroupId(groupId);
+            settlement.setCreatedAt(LocalDateTime.now());
 
             settlementRepository.save(settlement);
             // Step 4: ADD response DTO (for API output)

@@ -10,6 +10,8 @@ import com.ashutosh.Splitwise.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class SettlementService {
@@ -36,7 +38,9 @@ public class SettlementService {
                 receiver.getName(),
                 settlement.getAmount(),
                 settlement.getStatus(),
-                receiver.getPreferredPaymentMethod()
+                receiver.getPreferredPaymentMethod(),
+                settlement.getCreatedAt(),
+                settlement.getPaidAt()
         );
     }
 
@@ -51,8 +55,9 @@ public class SettlementService {
             return "Settlement already paid";
         }
 
-        settlement.setPaymentMethod(paymentMethod);
         settlement.setStatus("PAID");
+        settlement.setPaymentMethod(paymentMethod);
+        settlement.setPaidAt(LocalDateTime.now());
 
         settlementRepository.save(settlement);
 
