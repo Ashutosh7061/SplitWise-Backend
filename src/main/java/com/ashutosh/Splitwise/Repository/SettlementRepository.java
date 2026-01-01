@@ -9,4 +9,6 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
 
     //This allows filter ONLY UNPAID settlements;
     List<Settlement> findByGroupIdAndStatus(Long groupId, String status);
+
+    List<Settlement> findByGroupId(Long groupId);
 }

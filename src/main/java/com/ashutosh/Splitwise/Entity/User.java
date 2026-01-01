@@ -20,4 +20,9 @@ public class User {
 
     private String email;
 
+//    @ManyToOne
+//    @JoinColumn(name = "group_id")
+//    private Group group;
+
+
 }

@@ -8,8 +8,12 @@ import com.ashutosh.Splitwise.Entity.SettlementData;
 import com.ashutosh.Splitwise.Repository.ExpenseRepository;
 import com.ashutosh.Splitwise.Repository.SettlementRepository;
 import com.ashutosh.Splitwise.Repository.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +26,9 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final SettlementRepository settlementRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public Expense addExpense(Expense expense) {
         return expenseRepository.save(expense);
@@ -50,7 +57,9 @@ public class ExpenseService {
                 percentageSplit(expense, netBalance);
             }
         }
-        return simplifyBalances(netBalance, userNameMap, groupId);
+        Map<Long, Double> balanceCopy = new HashMap<>(netBalance);
+        return simplifyBalances(balanceCopy, userNameMap, groupId);
+
     }
 
 
@@ -104,15 +113,8 @@ public class ExpenseService {
     }
 
 
-
-
     // -------- SIMPLIFY BALANCES --------
-    private List<SettlementDataDto> simplifyBalances(
-            Map<Long, Double> netBalance,
-            Map<Long, String> userNameMap,
-            Long groupId
-    ) {
-
+    private List<SettlementDataDto> simplifyBalances( Map<Long, Double> netBalance, Map<Long, String> userNameMap, Long groupId) {
         List<Long> creditors = new ArrayList<>();
         List<Long> debtors = new ArrayList<>();
 
@@ -171,17 +173,14 @@ public class ExpenseService {
     }
 
 
-
     // -------- SIMPLE PARSER --------
                   // Input: {"2":1200,"3":1800}
     private Map<Long, Double> parseMap(String text) {
-
         Map<Long, Double> map = new HashMap<>();
 
         if (text == null || text.isEmpty()) {
             return map;
         }
-
         text = text.replace("{", "")
                 .replace("}", "")
                 .replace("\"", "");
@@ -197,7 +196,6 @@ public class ExpenseService {
     // ------- CREATE A METHOD TO MAP USER to NAME --------
 
     private Map<Long, String> getUserNameMap(List<Long> userIds) {
-
         Map<Long, String> map = new HashMap<>();
         List<com.ashutosh.Splitwise.Entity.User> users = userRepository.findAllById(userIds);
 
@@ -205,6 +203,77 @@ public class ExpenseService {
             map.put(user.getId(), user.getName());
         }
         return map;
+    }
+
+
+
+    // This is used for GroupSummary Data
+    public Map<Long, Double> calculateNetBalanceMap(Long groupId, List<Long> groupUserIds) {
+        Map<Long, Double> netBalance = new HashMap<>();
+        // 1️⃣ Initialize all users
+        for (Long userId : groupUserIds) {
+            netBalance.put(userId, 0.0);
+        }
+
+        List<Expense> expenses = expenseRepository.findByGroupId(groupId);
+
+        for (Expense expense : expenses) {
+            double amount = expense.getAmount();
+            Long paidBy = expense.getPaidByUserId();
+            // 2️⃣ Credit payer
+            netBalance.put(paidBy, netBalance.get(paidBy) + amount);
+
+            String splitType = expense.getSplitType();
+            String splitDetails = expense.getSplitDetails();
+
+            try {
+                /* ========== EQUAL ========== */
+                if ("EQUAL".equals(splitType)) {
+                    double share = amount / groupUserIds.size();
+                    for (Long userId : groupUserIds) {
+                        netBalance.put(
+                                userId,
+                                netBalance.get(userId) - share
+                        );
+                    }
+                    /* ========== EXACT ========== */
+                } else if ("EXACT".equals(splitType)) {
+                    Map<Long, Double> exactMap =
+                            objectMapper.readValue(
+                                    splitDetails,
+                                    new TypeReference<Map<Long, Double>>() {}
+                            );
+                    for (Map.Entry<Long, Double> entry : exactMap.entrySet()) {
+                        netBalance.put(
+                                entry.getKey(),
+                                netBalance.get(entry.getKey()) - entry.getValue()
+                        );
+                    }
+
+                    /* ========== PERCENTAGE ========== */
+                } else if ("PERCENTAGE".equals(splitType)) {
+                    Map<Long, Double> percentMap =
+                            objectMapper.readValue(
+                                    splitDetails,
+                                    new TypeReference<Map<Long, Double>>() {}
+                            );
+
+                    for (Map.Entry<Long, Double> entry : percentMap.entrySet()) {
+                        double share = amount * entry.getValue() / 100;
+                        netBalance.put(
+                                entry.getKey(),
+                                netBalance.get(entry.getKey()) - share
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Invalid split details for expense ID: " + expense.getId(),
+                        e
+                );
+            }
+        }
+        return netBalance;
     }
 
 }
