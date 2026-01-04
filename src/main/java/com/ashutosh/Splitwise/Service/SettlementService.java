@@ -51,8 +51,19 @@ public class SettlementService {
         Settlement settlement = settlementRepository.findById(settlementId)
                 .orElseThrow(()-> new RuntimeException("Settlement not found"));
 
+        User receiver = userRepository.findById(settlement.getToUserId())
+                .orElseThrow(()-> new RuntimeException("Receiver not found"));
+
+
+
         if("PAID".equals(settlement.getStatus())){
             return "Settlement already paid";
+        }
+
+        if(receiver.getPreferredPaymentMethod() != paymentMethod){
+            return "Payment method is not allowed. Preferred method is " +
+                            receiver.getPreferredPaymentMethod();
+
         }
 
         settlement.setStatus("PAID");
