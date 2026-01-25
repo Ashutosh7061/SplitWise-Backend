@@ -34,7 +34,7 @@ public class GroupSummaryService {
                 .orElseThrow(()-> new RuntimeException("Group not found"));
 
         List<Expense> expenses = expenseRepository.findByGroupId(groupId);
-        List<Settlement> settlements =settlementRepository.findByGroupId(groupId);
+        List<Settlement> settlements = settlementRepository.findByGroupId(groupId);
 
         // Calculating total expense
         double totalExpense = expenses.stream()

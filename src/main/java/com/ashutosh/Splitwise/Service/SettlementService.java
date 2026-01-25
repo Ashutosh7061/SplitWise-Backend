@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import com.ashutosh.Splitwise.Exception.InvalidPaymentMethodException;
+
 @Service
 @RequiredArgsConstructor
 public class SettlementService {
@@ -60,11 +62,13 @@ public class SettlementService {
             return "Settlement already paid";
         }
 
-        if(receiver.getPreferredPaymentMethod() != paymentMethod){
-            return "Payment method is not allowed. Preferred method is " +
-                            receiver.getPreferredPaymentMethod();
-
+        if (receiver.getPreferredPaymentMethod() != paymentMethod) {
+            throw new InvalidPaymentMethodException(
+                    paymentMethod + " is not accepted. Preferred method is "
+                            + receiver.getPreferredPaymentMethod()
+            );
         }
+
 
         settlement.setStatus("PAID");
         settlement.setPaymentMethod(paymentMethod);

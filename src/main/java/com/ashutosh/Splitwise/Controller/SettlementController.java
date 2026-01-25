@@ -19,6 +19,8 @@ public class SettlementController {
         return settlementService.getSettlementDetails(settlementId);
     }
 
+
+
     @PostMapping("/{settlementId}/pay")
     public String paySettlement(@PathVariable Long settlementId, @RequestBody PaySettlementRequest request){
         return settlementService.paySettlement(
