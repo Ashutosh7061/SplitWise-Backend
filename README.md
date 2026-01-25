@@ -1,7 +1,17 @@
 # SplitWise 💸
 
-SplitWise is a simple expense sharing backend application built using Spring Boot.  
-It helps users manage group expenses, calculate individual balances, and generate optimized settlement instructions that clearly show who owes whom and how much, while minimizing the number of transactions.
+Welcome to **SplitWise-Backend**, a Java-based application designed to manage and split expenses among groups of individuals with ease and efficiency.
+
+---
+
+## 📖 Project Overview
+
+**SplitWise-Backend** is the server-side implementation for an expense-sharing platform. The application allows users to:
+- Manage expenses within groups.
+- Track outstanding balances between individuals.
+- Simplify the process of settling debts.
+
+This backend service handles the core functionality of the system, including data persistence, business logic, and exposing APIs for client-side interaction.
 
 ---
 
@@ -32,6 +42,44 @@ It helps users manage group expenses, calculate individual balances, and generat
 - Build Tool: Maven
 - Tools: Git, GitHub, Postman
 - Email: JavaMailSender (SMTP)
+
+---
+
+
+## ⚙️ Installation Instructions
+
+Before setting up the project locally, ensure that you have the following installed on your system:
+- Java 8 or higher
+- Apache Maven / Gradle
+- Database server (Optional: MySQL/PostgreSQL)
+
+### Steps
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/Ashutosh7061/SplitWise-Backend.git
+   cd SplitWise-Backend
+   ```
+
+2. **Configure Database**:
+  - Update the `application.properties` or `application.yml` file under `/src/main/resources` with your database credentials.
+
+3. **Build Project**:
+  - Using Maven:
+    ```bash
+    mvn clean package
+    ```
+  - Using Gradle:
+    ```bash
+    ./gradlew build
+    ```
+
+4. **Run the Application**:
+   ```bash
+   java -jar target/<application-jar>.jar
+   ```
+
+5. **Access APIs**:
+  - The backend APIs will be accessible at `http://localhost:8080` by default.
 
 ---
 
@@ -155,6 +203,22 @@ Implemented using:
 
 ---
 
+## 👥 Contributing
+
+Contributions are welcome! To contribute:
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit and push changes.
+4. Open a Pull Request.
+
+## 📞 Contact
+
+- **Author**: [Ashutosh7061](https://github.com/Ashutosh7061)
+
+If you have any questions, feel free to reach out!
+
+---
+
 ## 📌 Conclusion
 
 ExpenseEase is a production-style backend project that demonstrates:
@@ -163,5 +227,7 @@ ExpenseEase is a production-style backend project that demonstrates:
 - Strong problem-solving skills
 
 This project is well-suited for fresher backend interviews and showcases practical experience with Spring Boot.
+
+
 
 
