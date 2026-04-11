@@ -18,11 +18,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private PaymentMethod preferredPaymentMethod;
 
+    @Column(unique = true)
     private String email;
-
-//    @ManyToOne
-//    @JoinColumn(name = "group_id")
-//    private Group group;
 
 
 }

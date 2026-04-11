@@ -24,4 +24,16 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<String> handleDataNotFound(DataNotFoundException ex){
+
+        return new ResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<String> handleDuplicateData(DuplicateDataException ex){
+
+        return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+    }
 }

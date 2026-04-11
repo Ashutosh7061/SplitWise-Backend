@@ -19,7 +19,8 @@ public class Group {
 
     private String name;
 
-//    @OneToMany(mappedBy = "group")
-//    private List<User> users;
+    private Long createdBy;
+
+    private String status;
 
 }

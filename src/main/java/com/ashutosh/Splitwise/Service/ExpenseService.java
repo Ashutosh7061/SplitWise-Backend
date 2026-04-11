@@ -1,13 +1,9 @@
 package com.ashutosh.Splitwise.Service;
 
 import com.ashutosh.Splitwise.Dto.SettlementDataDto;
-import com.ashutosh.Splitwise.Entity.Expense;
-import com.ashutosh.Splitwise.Entity.Settlement;
-import com.ashutosh.Splitwise.Entity.User;
-import com.ashutosh.Splitwise.Entity.SettlementData;
-import com.ashutosh.Splitwise.Repository.ExpenseRepository;
-import com.ashutosh.Splitwise.Repository.SettlementRepository;
-import com.ashutosh.Splitwise.Repository.UserRepository;
+import com.ashutosh.Splitwise.Entity.*;
+import com.ashutosh.Splitwise.Exception.DataNotFoundException;
+import com.ashutosh.Splitwise.Repository.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +22,30 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final SettlementRepository settlementRepository;
+    private final GroupMembershipRepository groupMembershipRepository;
+    private final GroupRepository groupRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     public Expense addExpense(Expense expense) {
+
+        Long groupId = expense.getGroupId();
+        Long paidByUserId = expense.getPaidByUserId();
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        if (!"ACTIVE".equals(group.getStatus())) {
+            throw new RuntimeException("Group is inactive");
+        }
+
+        Optional<GroupMembership> membership =
+                groupMembershipRepository.findByGroupIdAndUserIdAndLeftAtIsNull(groupId, paidByUserId);
+
+        if (membership.isEmpty()) {
+            throw new DataNotFoundException("User not part of group");
+        }
         return expenseRepository.save(expense);
     }
 
@@ -210,7 +225,7 @@ public class ExpenseService {
     // This is used for GroupSummary Data
     public Map<Long, Double> calculateNetBalanceMap(Long groupId, List<Long> groupUserIds) {
         Map<Long, Double> netBalance = new HashMap<>();
-        // 1️⃣ Initialize all users
+        // Initialize all users
         for (Long userId : groupUserIds) {
             netBalance.put(userId, 0.0);
         }
@@ -220,7 +235,7 @@ public class ExpenseService {
         for (Expense expense : expenses) {
             double amount = expense.getAmount();
             Long paidBy = expense.getPaidByUserId();
-            // 2️⃣ Credit payer
+            // Credit payer
             netBalance.put(paidBy, netBalance.get(paidBy) + amount);
 
             String splitType = expense.getSplitType();

@@ -3,6 +3,7 @@ package com.ashutosh.Splitwise.Controller;
 
 import com.ashutosh.Splitwise.Exception.UserNotFoundException;
 import com.ashutosh.Splitwise.Repository.UserRepository;
+import com.ashutosh.Splitwise.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import com.ashutosh.Splitwise.Entity.User;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,11 @@ import java.util.List;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping
     public User createUser(@RequestBody User user){
-        return userRepository.save(user);
+        return userService.createUser(user);
     }
 
     @GetMapping
