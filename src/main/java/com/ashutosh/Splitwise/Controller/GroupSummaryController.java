@@ -1,12 +1,11 @@
 package com.ashutosh.Splitwise.Controller;
 
 import com.ashutosh.Splitwise.Dto.GroupSummaryDto;
+import com.ashutosh.Splitwise.Dto.TimeBasedGroupSummaryDto;
+import com.ashutosh.Splitwise.Dto.UserGroupSummaryDto;
 import com.ashutosh.Splitwise.Service.GroupSummaryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,4 +18,19 @@ public class GroupSummaryController {
         return groupSummaryService.getGroupSummary(groupId);
     }
 
+    @GetMapping("/{groupId}/analysis")
+    public TimeBasedGroupSummaryDto getAnalysis(
+            @PathVariable Long groupId,
+            @RequestParam String type) {
+
+        return groupSummaryService.getGroupSummaryByTime(groupId, type);
+    }
+
+    @GetMapping("/{groupId}/summary/user")
+    public UserGroupSummaryDto getUserSummary(
+            @RequestParam Long groupId,
+            @RequestParam String email) {
+
+        return groupSummaryService.getUserGroupSummary(groupId, email);
+    }
 }

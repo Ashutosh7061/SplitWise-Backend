@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,6 +22,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMembershipRepository groupMembershipRepository;
     private final UserRepository userRepository;
+    private final ExpenseService expenseService;
 
 
     public Group createGroup(String name, Long userId){
@@ -72,13 +75,13 @@ public class GroupService {
         return "User added successfully";
     }
 
-    public String removeUser(Long groupId, Long removeUserId, Long userId) {
+    public String removeUser(Long groupId, Long removeUserId, Long adminUserId) {
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
         // admin check
-        if (!group.getCreatedBy().equals(userId)) {
+        if (!group.getCreatedBy().equals(adminUserId)) {
             return "Only admin can remove users";
         }
 
@@ -86,7 +89,57 @@ public class GroupService {
                 .findByGroupIdAndUserIdAndLeftAtIsNull(groupId, removeUserId)
                 .orElseThrow(() -> new RuntimeException("User not in group"));
 
-        // balance check-before removing
+        List<GroupMembership> members = groupMembershipRepository.findByGroupId(groupId);
+
+        List<Long> userIds = members.stream()
+                .map(GroupMembership::getUserId)
+                .toList();
+
+        Map<Long, Double> balanceMap = expenseService.calculateNetBalanceMap(groupId, userIds);
+
+        double userBalance = balanceMap.getOrDefault(removeUserId, 0.0);
+
+        if (Math.abs(userBalance) > 0.01) {
+            StringBuilder message = new StringBuilder();
+
+            if (userBalance < 0) {
+                // user owes money
+                double amountToPay = Math.abs(userBalance);
+                for (Map.Entry<Long, Double> entry : balanceMap.entrySet()) {
+                    if (entry.getValue() > 0) { // creditor
+                        User creditor = userRepository.findById(entry.getKey()).orElseThrow();
+                        double amount = Math.min(amountToPay, entry.getValue());
+
+                        message.append("You need to pay ₹")
+                                .append(amount)
+                                .append(" to ")
+                                .append(creditor.getName())
+                                .append(". ");
+                        amountToPay -= amount;
+                        if (amountToPay <= 0) break;
+                    }
+                }
+
+            } else {
+                // user will receive money
+                double amountToReceive = userBalance;
+                for (Map.Entry<Long, Double> entry : balanceMap.entrySet()) {
+                    if (entry.getValue() < 0) { // debtor
+                        User debtor = userRepository.findById(entry.getKey()).orElseThrow();
+                        double amount = Math.min(amountToReceive, Math.abs(entry.getValue()));
+
+                        message.append(debtor.getName())
+                                .append(" needs to pay you ₹")
+                                .append(amount)
+                                .append(". ");
+                        amountToReceive -= amount;
+                        if (amountToReceive <= 0) break;
+                    }
+                }
+            }
+            return message.toString();
+        }
+
         membership.setLeftAt(LocalDateTime.now());
 
         groupMembershipRepository.save(membership);

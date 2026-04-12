@@ -8,10 +8,6 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-//    List<User> findAllByGroupId(Long groupId);
-
-//      List<User> findAllByGroup_Id(Long groupId);
-
     Optional<User> findByEmail(String email);
 
 }

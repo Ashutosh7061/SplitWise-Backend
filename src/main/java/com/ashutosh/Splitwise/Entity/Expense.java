@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -25,4 +27,6 @@ public class Expense {
 
     @Column(length = 1000)
     private String splitDetails;
+
+    private LocalDateTime createdAt;
 }

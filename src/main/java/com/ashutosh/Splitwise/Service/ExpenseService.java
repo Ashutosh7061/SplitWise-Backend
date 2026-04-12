@@ -46,6 +46,8 @@ public class ExpenseService {
         if (membership.isEmpty()) {
             throw new DataNotFoundException("User not part of group");
         }
+
+        expense.setCreatedAt(LocalDateTime.now());
         return expenseRepository.save(expense);
     }
 

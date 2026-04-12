@@ -36,4 +36,10 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_GATEWAY);
     }
+
+    @ExceptionHandler(InvalidTypeException.class)
+    public ResponseEntity<String> handleInvalidType(InvalidTypeException ex){
+
+        return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+    }
 }
