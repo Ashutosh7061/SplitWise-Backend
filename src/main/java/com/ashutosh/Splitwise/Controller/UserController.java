@@ -34,5 +34,4 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException("User not found with specific id "+ id));
         return user;
     }
-
 }

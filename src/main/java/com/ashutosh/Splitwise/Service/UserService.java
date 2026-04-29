@@ -21,7 +21,6 @@ public class UserService {
         if (existingUser.isPresent()) {
             throw new DuplicateDataException("User already exists with this email");
         }
-
         return userRepository.save(user);
     }
 }
