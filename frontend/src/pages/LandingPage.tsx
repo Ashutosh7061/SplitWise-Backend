@@ -1,0 +1,118 @@
+import { ArrowRight, BadgeIndianRupee, ShieldCheck, Sparkles, Users2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const features = [
+  {
+    icon: BadgeIndianRupee,
+    title: 'Fast expense entry',
+    copy: 'Capture shared expenses in seconds with equal, exact, or percentage splits.'
+  },
+  {
+    icon: Users2,
+    title: 'Group-aware workflow',
+    copy: 'Manage members, balances, and settlement cycles from one polished workspace.'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Clear settlement trail',
+    copy: 'Track who owes whom, what was paid, and which payments are pending.'
+  },
+  {
+    icon: Sparkles,
+    title: 'Personal budget tracking',
+    copy: 'Set a monthly limit, log personal spend, and see the remaining budget instantly.'
+  }
+];
+
+export function LandingPage() {
+  return (
+    <div className="landing-page">
+      <section className="hero-card">
+        <div className="hero-copy">
+          <p className="eyebrow">Modern shared-expense platform</p>
+          <h1>Split every bill with clarity, speed, and a premium experience.</h1>
+          <p className="hero-text">
+            Splitwise Pro turns backend calculations into a clean, production-style finance dashboard for
+            friends, trips, and shared living.
+          </p>
+
+          <div className="hero-actions">
+            <Link className="button primary" to="/auth">
+              Start now
+              <ArrowRight size={16} />
+            </Link>
+            <Link className="button ghost" to="/auth?next=/app/personal">
+              Start personal tracking
+            </Link>
+            <Link className="button ghost" to="/app">
+              Open dashboard
+            </Link>
+          </div>
+
+          <div className="hero-metrics">
+            <div>
+              <strong>Equal</strong>
+              <span>Split styles</span>
+            </div>
+            <div>
+              <strong>1-click</strong>
+              <span>Settlement updates</span>
+            </div>
+            <div>
+              <strong>Weekly</strong>
+              <span>Summary reporting</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="hero-visual">
+          <div className="floating-panel accent">
+            <p>Trip to Goa</p>
+            <strong>INR 18,420</strong>
+            <span>12 expenses - 5 members</span>
+          </div>
+          <div className="floating-panel secondary">
+            <p>Open settlements</p>
+            <strong>3</strong>
+            <span>2 pending payments</span>
+          </div>
+          <div className="floating-panel tertiary">
+            <p>Net balance</p>
+            <strong>INR 4,120</strong>
+            <span>You are owed back</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="feature-grid">
+        {features.map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <article key={feature.title} className="feature-card">
+              <Icon size={22} />
+              <h3>{feature.title}</h3>
+              <p>{feature.copy}</p>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="story-card">
+        <div>
+          <p className="eyebrow">Built for real usage</p>
+          <h2>From login to settlement, the workflow stays focused and understandable.</h2>
+        </div>
+        <div className="story-steps">
+          <span>1. Create your profile</span>
+          <span>2. Create or join a group</span>
+          <span>3. Add monthly budget and track personal spend</span>
+        </div>
+      </section>
+
+      <div className="landing-footer">
+        <Sparkles size={16} />
+        <span>Professional frontend layer for the Spring Boot Splitwise backend</span>
+      </div>
+    </div>
+  );
+}
