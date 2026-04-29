@@ -1,5 +1,6 @@
 package com.ashutosh.Splitwise.Service;
 
+import com.ashutosh.Splitwise.Dto.GroupMemberDto;
 import com.ashutosh.Splitwise.Entity.Group;
 import com.ashutosh.Splitwise.Entity.GroupMembership;
 import com.ashutosh.Splitwise.Entity.User;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -145,5 +147,28 @@ public class GroupService {
         groupMembershipRepository.save(membership);
 
         return "User removed successfully";
+    }
+
+    public List<GroupMemberDto> getGroupMembers(Long groupId) {
+        List<GroupMembership> memberships = groupMembershipRepository.findByGroupId(groupId);
+
+        return memberships.stream()
+                .map(membership -> {
+                    User user = userRepository.findById(membership.getUserId())
+                            .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+                    return new GroupMemberDto(
+                            membership.getId(),
+                            membership.getGroupId(),
+                            membership.getUserId(),
+                            user.getName(),
+                            user.getEmail(),
+                            user.getPreferredPaymentMethod(),
+                            membership.getJoinedAt(),
+                            membership.getLeftAt(),
+                            membership.getLeftAt() == null
+                    );
+                })
+                .collect(Collectors.toList());
     }
 }

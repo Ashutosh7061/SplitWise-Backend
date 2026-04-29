@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,7 +53,11 @@ public class ExpenseService {
     }
 
     // MAIN BALANCE LOGIC
+    @Transactional
     public List<SettlementDataDto> calculateBalances(Long groupId, List<Long> userIds) {
+
+        // Rebuild unpaid settlements from current balances to avoid duplicate accumulation.
+        settlementRepository.deleteByGroupIdAndStatus(groupId, "UNPAID");
 
         List<Expense> expenses = expenseRepository.findByGroupId(groupId);
         Map<Long, Double> netBalance = new HashMap<>();
@@ -77,6 +82,10 @@ public class ExpenseService {
         Map<Long, Double> balanceCopy = new HashMap<>(netBalance);
         return simplifyBalances(balanceCopy, userNameMap, groupId);
 
+    }
+
+    public List<Expense> getExpensesForGroup(Long groupId) {
+        return expenseRepository.findByGroupId(groupId);
     }
 
 
@@ -202,9 +211,14 @@ public class ExpenseService {
                 .replace("}", "")
                 .replace("\"", "");
         String[] pairs = text.split(",");
-
         for (String pair : pairs) {
+            if (pair == null || pair.isBlank() || !pair.contains(":")) {
+                continue;
+            }
             String[] kv = pair.split(":");
+            if (kv.length < 2 || kv[0].isBlank() || kv[1].isBlank()) {
+                continue;
+            }
             map.put(Long.parseLong(kv[0]), Double.parseDouble(kv[1]));
         }
         return map;

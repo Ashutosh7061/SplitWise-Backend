@@ -79,9 +79,15 @@ public class GroupSummaryService {
                 String[] entries = cleaned.split(",");
 
                 for (String entry : entries) {
+                    if (entry == null || entry.isBlank() || !entry.contains(":")) {
+                        continue;
+                    }
                     String userIdStr = entry.split(":")[0]
                             .replace("\"", "")
                             .trim();
+                    if (userIdStr.isBlank()) {
+                        continue;
+                    }
                     userIdSet.add(Long.parseLong(userIdStr));
                 }
             }
@@ -212,9 +218,16 @@ public class GroupSummaryService {
                 String[] entries = cleaned.split(",");
 
                 for (String entry : entries) {
+                    if (entry == null || entry.isBlank() || !entry.contains(":")) {
+                        continue;
+                    }
                     String userIdStr = entry.split(":")[0]
                             .replace("\"", "")
                             .trim();
+
+                    if (userIdStr.isBlank()) {
+                        continue;
+                    }
 
                     userIdSet.add(Long.parseLong(userIdStr));
                 }
@@ -269,7 +282,6 @@ public class GroupSummaryService {
                 settlementSummary
         );
     }
-
    public UserGroupSummaryDto getUserGroupSummary(Long groupId, String emailId){
 
         User user = userRepository.findByEmail(emailId)

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.ashutosh.Splitwise.Exception.InvalidPaymentMethodException;
 
@@ -77,6 +78,28 @@ public class SettlementService {
         settlementRepository.save(settlement);
 
         return "Payment successful via " + paymentMethod;
+    }
+
+    public List<SettlementDto> getSettlementsForGroup(Long groupId) {
+        return settlementRepository.findByGroupId(groupId).stream()
+                .map(settlement -> {
+                    User payer = userRepository.findById(settlement.getFromUserId())
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    User receiver = userRepository.findById(settlement.getToUserId())
+                            .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+                    return new SettlementDto(
+                            settlement.getId(),
+                            payer.getName(),
+                            receiver.getName(),
+                            settlement.getAmount(),
+                            settlement.getStatus(),
+                            receiver.getPreferredPaymentMethod(),
+                            settlement.getCreatedAt(),
+                            settlement.getPaidAt()
+                    );
+                })
+                .toList();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.ashutosh.Splitwise.Controller;
 
+import com.ashutosh.Splitwise.Dto.GroupMemberDto;
 import com.ashutosh.Splitwise.Entity.Group;
 import com.ashutosh.Splitwise.Repository.GroupRepository;
 import com.ashutosh.Splitwise.Service.GroupService;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+
 
 @RestController
 @RequestMapping("/groups")
@@ -50,5 +51,10 @@ public class GroupController {
         Long userId = Long.valueOf(request.get("userId").toString());
 
         return groupService.removeUser(groupId, removeUserId, userId);
+    }
+
+    @GetMapping("/{groupId}/members")
+    public List<GroupMemberDto> getGroupMembers(@PathVariable Long groupId) {
+        return groupService.getGroupMembers(groupId);
     }
 }

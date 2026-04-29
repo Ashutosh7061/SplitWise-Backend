@@ -21,6 +21,11 @@ public class ExpenseController {
         return expenseService.addExpense(expense);
     }
 
+    @GetMapping("/group/{groupId}")
+    public List<Expense> getExpenses(@PathVariable Long groupId) {
+        return expenseService.getExpensesForGroup(groupId);
+    }
+
     @PostMapping("/balances/{groupId}")
     public List<SettlementDataDto> getBalances(
             @PathVariable Long groupId,
