@@ -27,19 +27,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<String> handleDataNotFound(DataNotFoundException ex){
-
         return new ResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DuplicateDataException.class)
     public ResponseEntity<String> handleDuplicateData(DuplicateDataException ex){
-
         return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_GATEWAY);
     }
 
     @ExceptionHandler(InvalidTypeException.class)
     public ResponseEntity<String> handleInvalidType(InvalidTypeException ex){
-
         return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(InvalidBudgetAmountException.class)
+    public ResponseEntity<String > handleInvalidBudgetAmount(InvalidBudgetAmountException ex){
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

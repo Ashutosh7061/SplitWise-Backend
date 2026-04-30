@@ -1,15 +1,34 @@
 package com.ashutosh.Splitwise.Service;
 
-import com.ashutosh.Splitwise.Dto.*;
-import com.ashutosh.Splitwise.Entity.*;
-import com.ashutosh.Splitwise.Exception.DataNotFoundException;
-import com.ashutosh.Splitwise.Exception.InvalidTypeException;
-import com.ashutosh.Splitwise.Repository.*;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import com.ashutosh.Splitwise.Dto.GroupSummaryDto;
+import com.ashutosh.Splitwise.Dto.SettlementSummaryDto;
+import com.ashutosh.Splitwise.Dto.TimeBasedGroupSummaryDto;
+import com.ashutosh.Splitwise.Dto.UserExpenseSummaryDto;
+import com.ashutosh.Splitwise.Dto.UserGroupSummaryDto;
+import com.ashutosh.Splitwise.Entity.Expense;
+import com.ashutosh.Splitwise.Entity.Group;
+import com.ashutosh.Splitwise.Entity.GroupMembership;
+import com.ashutosh.Splitwise.Entity.Settlement;
+import com.ashutosh.Splitwise.Entity.User;
+import com.ashutosh.Splitwise.Exception.DataNotFoundException;
+import com.ashutosh.Splitwise.Exception.InvalidTypeException;
+import com.ashutosh.Splitwise.Repository.ExpenseRepository;
+import com.ashutosh.Splitwise.Repository.GroupMembershipRepository;
+import com.ashutosh.Splitwise.Repository.GroupRepository;
+import com.ashutosh.Splitwise.Repository.SettlementRepository;
+import com.ashutosh.Splitwise.Repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +128,10 @@ public class GroupSummaryService {
             double net = entry.getValue();
             double paid = totalPaid.getOrDefault(userId, 0.0);
 
-            double owes = paid - net;
+            // Round to 2 decimal places to avoid floating-point precision errors
+            double owes = Math.round((paid - net) * 100.0) / 100.0;
+            paid = Math.round(paid * 100.0) / 100.0;
+            net = Math.round(net * 100.0) / 100.0;
 
             userSummaries.add(
                     new UserExpenseSummaryDto(
@@ -251,7 +273,10 @@ public class GroupSummaryService {
             double net = entry.getValue();
             double paid = totalPaid.getOrDefault(userId, 0.0);
 
-            double owes = paid - net;
+            // Round to 2 decimal places to avoid floating-point precision errors
+            double owes = Math.round((paid - net) * 100.0) / 100.0;
+            paid = Math.round(paid * 100.0) / 100.0;
+            net = Math.round(net * 100.0) / 100.0;
 
             userSummaries.add(
                     new UserExpenseSummaryDto(

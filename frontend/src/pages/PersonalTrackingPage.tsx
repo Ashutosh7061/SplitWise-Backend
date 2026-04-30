@@ -53,6 +53,7 @@ export function PersonalTrackingPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [editingBudget, setEditingBudget] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +73,7 @@ export function PersonalTrackingPage() {
         }
 
         setBudgetTrack(track);
+        setBudgetLimit(track.limit.toString());
         const [monthlySummary, expenses] = await Promise.all([
           getPersonalMonthlySummary(currentUser.id, year, month),
           getPersonalExpenses(currentUser.id)
@@ -131,8 +133,10 @@ export function PersonalTrackingPage() {
     });
 
     setBudgetTrack(track);
+    setBudgetLimit(track.limit.toString());
     setSummary(monthlySummary);
     setHistory(monthHistory);
+    setEditingBudget(false);
   }
 
   async function handleBudgetSubmit(event: FormEvent<HTMLFormElement>) {
@@ -153,7 +157,7 @@ export function PersonalTrackingPage() {
         month
       });
       await refreshTracking();
-      setSuccess(`Monthly budget set for ${monthLabel}.`);
+      setSuccess(`Monthly budget ${editingBudget ? 'updated' : 'set'} for ${monthLabel}.`);
     } catch (exception) {
       setError(exception instanceof ApiError ? exception.message : 'Unable to save budget');
     } finally {
@@ -225,11 +229,11 @@ export function PersonalTrackingPage() {
         </div>
       </section>
 
-      {!budgetTrack ? (
+      {!budgetTrack || editingBudget ? (
         <section className="panel-card form-panel" id="budget-form">
           <SectionHeader
-            title="Add monthly budget"
-            subtitle="Set the limit first, then you can record personal expenses against it."
+            title={editingBudget ? 'Edit monthly budget' : 'Add monthly budget'}
+            subtitle={editingBudget ? 'Update your budget limit for the current month.' : 'Set the limit first, then you can record personal expenses against it.'}
           />
 
           <form className="stack" onSubmit={handleBudgetSubmit}>
@@ -252,18 +256,45 @@ export function PersonalTrackingPage() {
               </label>
             </div>
 
-            <button type="submit" className="button primary" disabled={busy}>
-              {busy ? 'Saving...' : 'Save budget'}
-            </button>
+            <div className="form-actions">
+              <button type="submit" className="button primary" disabled={busy}>
+                {busy ? 'Saving...' : editingBudget ? 'Update budget' : 'Save budget'}
+              </button>
+              {editingBudget && (
+                <button
+                  type="button"
+                  className="button ghost"
+                  onClick={() => {
+                    setEditingBudget(false);
+                    setBudgetLimit(budgetTrack?.limit.toString() || '');
+                  }}
+                  disabled={busy}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         </section>
       ) : (
         <>
-          <section className="overview-grid">
-            <StatCard label="Budget limit" value={budgetTrack.limit} valueType="currency" tone="accent" hint={monthLabel} />
-            <StatCard label="Spent so far" value={budgetTrack.spent} valueType="currency" tone="warning" hint="Current month" />
-            <StatCard label="Remaining Budget" value={budgetTrack.remaining} valueType="currency" tone="success" hint={budgetTrack.status} />
-            <StatCard label="Top category" value={topCategory ? formatCurrency(topCategory[1]) : 'No activity'} tone="neutral" hint={topCategory ? topCategory[0] : 'Add an expense to start'} />
+          <section className="budget-section">
+            <div className="budget-header">
+              <h3>Budget Overview</h3>
+              <button
+                type="button"
+                className="button primary"
+                onClick={() => setEditingBudget(true)}
+              >
+                Edit budget
+              </button>
+            </div>
+            <section className="overview-grid">
+              <StatCard label="Budget limit" value={budgetTrack.limit} valueType="currency" tone="accent" hint={monthLabel} />
+              <StatCard label="Spent so far" value={budgetTrack.spent} valueType="currency" tone="warning" hint="Current month" />
+              <StatCard label="Remaining Budget" value={budgetTrack.remaining} valueType="currency" tone="success" hint={budgetTrack.status} />
+              <StatCard label="Top category" value={topCategory ? formatCurrency(topCategory[1]) : 'No activity'} tone="neutral" hint={topCategory ? topCategory[0] : 'Add an expense to start'} />
+            </section>
           </section>
 
           <section className="panel-grid">

@@ -91,40 +91,19 @@ Before setting up the project locally, ensure that you have the following instal
 src/main/java/com/ashutosh/Splitwise
 │
 ├── Controller
-│   ├── ExpenseController.java
-│   ├── GroupController.java
-│   ├── GroupSummaryController.java
-│   ├── SettlementController.java
-│   ├── NotificationController.java
-│   └── UserController.java
-│
+│   ├── ExpenseController.java  
+│   
 ├── Service
 │   ├── ExpenseService.java
-│   ├── SettlementService.java
-│   ├── GroupSummaryService.java
-│   ├── NotificationService.java
-│   └── EmailService.java
 │
 ├── Repository
 │   ├── ExpenseRepository.java
-│   ├── GroupRepository.java
-│   ├── SettlementRepository.java
-│   └── UserRepository.java
 │
 ├── Entity
 │   ├── Expense.java
-│   ├── Group.java
-│   ├── Settlement.java
-│   ├── SettlementData.java
-│   └── User.java
 │
 ├── Dto
 │   ├── GroupSummaryDto.java
-│   ├── UserExpenseSummaryDto.java
-│   ├── SettlementDto.java
-│   ├── SettlementDataDto.java
-│   ├── SettlementSummaryDto.java
-│   └── PaySettlementRequest.java
 │
 ├── Enum
 │   └── PaymentMethod.java
