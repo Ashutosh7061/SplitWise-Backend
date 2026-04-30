@@ -21,7 +21,30 @@ export type CreateUserPayload = {
   name: string;
   email: string;
   password: string;
+  upiId: string;
   preferredPaymentMethod?: PaymentMethod;
+};
+
+export type UpdateUpiIdPayload = {
+  userEmailId: string;
+  oldUpiId: string;
+  newUpiId: string;
+};
+
+export type UpdatePasswordPayload = {
+  userEmailId: string;
+  oldPassword: string;
+  newPassword: string;
+};
+
+export type ForgotPasswordPayload = {
+  email: string;
+};
+
+export type ResetPasswordPayload = {
+  email: string;
+  otp: string;
+  newPassword: string;
 };
 
 export type CreateGroupPayload = {
@@ -59,6 +82,50 @@ export async function createUser(payload: CreateUserPayload) {
     method: 'POST',
     body: JSON.stringify(payload)
   });
+}
+
+function ensureExactMessage(message: string, expected: string) {
+  if (message !== expected) {
+    throw new ApiError(message, 400);
+  }
+
+  return message;
+}
+
+export async function updateUpiId(payload: UpdateUpiIdPayload) {
+  const message = await apiRequest<string>('/users/update-upi', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  return ensureExactMessage(message, 'UPI ID updated successfully');
+}
+
+export async function updatePassword(payload: UpdatePasswordPayload) {
+  const message = await apiRequest<string>('/users/update-password', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  return ensureExactMessage(message, 'Password updated successfully');
+}
+
+export async function sendForgotPasswordOtp(payload: ForgotPasswordPayload) {
+  const message = await apiRequest<string>('/users/forgot-password/send-otp', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  return ensureExactMessage(message, 'OTP sent to registered email');
+}
+
+export async function resetForgotPassword(payload: ResetPasswordPayload) {
+  const message = await apiRequest<string>('/users/forgot-password/reset', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  return ensureExactMessage(message, 'Password reset successfully');
 }
 
 export async function addPersonalExpense(payload: PersonalExpensePayload) {

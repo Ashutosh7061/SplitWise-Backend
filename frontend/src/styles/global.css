@@ -234,15 +234,39 @@ h3,
   transform: translateY(-1px);
 }
 
+.button {
+  min-height: 48px;
+  font-size: 0.98rem;
+  line-height: 1;
+}
+
 .button.primary {
-  background: linear-gradient(135deg, var(--accent), #ffd27a);
-  color: #09111e;
+  background: linear-gradient(90deg, var(--accent) 0%, #ffb84a 100%);
+  color: #08111a;
+  box-shadow: 0 8px 30px rgba(245,160,40,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.button.primary:hover {
+  filter: brightness(0.98);
+  box-shadow: 0 12px 40px rgba(245,160,40,0.18);
 }
 
 .button.ghost {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted);
+}
+
+.button.ghost:hover {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(245,165,36,0.14);
   color: var(--text);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(245,165,36,0.12);
 }
 
 .action-card {
@@ -708,7 +732,7 @@ h3,
 .auth-form,
 .stack {
   display: grid;
-  gap: 32px;
+  gap: 24px;
 }
 
 label {
@@ -770,6 +794,82 @@ select:focus {
 .nav-link.active {
   background: rgba(245, 165, 36, 0.16);
   border-color: rgba(245, 165, 36, 0.35);
+
+.auth-actions {
+  align-items: center;
+}
+
+.field-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.auth-form.compact-form {
+  gap: 18px;
+}
+
+.account-grid {
+  margin-top: 18px;
+}
+
+.account-summary-card,
+.account-editor-card {
+  min-height: 100%;
+}
+
+.account-summary {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+
+.account-summary-row {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+
+.account-summary-row span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.account-summary-row strong {
+  font-size: 1rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.account-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.account-tabs .tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-side-card ul {
+  margin: 18px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  display: grid;
+  gap: 10px;
+}
+
+.auth-side-card li {
+  line-height: 1.5;
+}
 }
 
 .notice {

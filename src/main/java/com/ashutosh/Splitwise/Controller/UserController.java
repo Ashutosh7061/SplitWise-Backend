@@ -1,6 +1,10 @@
 package com.ashutosh.Splitwise.Controller;
 
 
+import com.ashutosh.Splitwise.Dto.ForgotPasswordRequestDto;
+import com.ashutosh.Splitwise.Dto.ResetPasswordRequestDto;
+import com.ashutosh.Splitwise.Dto.UpdatePasswordRequestDto;
+import com.ashutosh.Splitwise.Dto.UpdateUpiIdRequestDto;
 import com.ashutosh.Splitwise.Exception.UserNotFoundException;
 import com.ashutosh.Splitwise.Repository.UserRepository;
 import com.ashutosh.Splitwise.Service.UserService;
@@ -33,5 +37,25 @@ public class UserController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with specific id "+ id));
         return user;
+    }
+
+    @PostMapping("/update-password")
+    public String updatePassword(@RequestBody UpdatePasswordRequestDto request){
+        return userService.updatePassword(request);
+    }
+
+    @PostMapping("/update-upi")
+    public String updateUpi(@RequestBody UpdateUpiIdRequestDto request) {
+        return userService.updateUpi(request);
+    }
+
+    @PostMapping("/forgot-password/send-otp")
+    public String sendOtp(@RequestBody ForgotPasswordRequestDto request) {
+        return userService.sendOtp(request);
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public String resetPassword(@RequestBody ResetPasswordRequestDto request) {
+        return userService.resetPassword(request);
     }
 }

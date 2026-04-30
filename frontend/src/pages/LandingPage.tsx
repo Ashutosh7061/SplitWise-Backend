@@ -37,7 +37,7 @@ export function LandingPage() {
           </p>
 
           <div className="hero-actions">
-            <Link className="button primary" to="/auth">
+            <Link className="button primary" to="/auth?next=/app">
               Start now
               <ArrowRight size={16} />
             </Link>

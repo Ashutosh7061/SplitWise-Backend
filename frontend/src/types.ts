@@ -6,6 +6,7 @@ export interface User {
   preferredPaymentMethod: PaymentMethod | null;
   email: string;
   password?: string | null;
+  upiId?: string | null;
 }
 
 export interface Group {

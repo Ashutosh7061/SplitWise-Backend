@@ -215,10 +215,14 @@ export function PersonalTrackingPage() {
             <Link className="button ghost" to="/app">
               Back to dashboard
             </Link>
-            <a className="button primary" href="#budget-form">
+            <button
+              type="button"
+              className="button primary"
+              onClick={() => setEditingBudget(true)}
+            >
               <ArrowRight size={16} />
               Add monthly budget
-            </a>
+            </button>
           </div>
         </div>
 

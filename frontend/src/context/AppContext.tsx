@@ -4,6 +4,10 @@ import {
   createUser,
   getGroups,
   getUsers,
+  resetForgotPassword,
+  sendForgotPasswordOtp,
+  updatePassword,
+  updateUpiId,
   type CreateUserPayload
 } from '../api/splitwiseApi';
 import type { Group, PaymentMethod, User } from '../types';
@@ -21,6 +25,10 @@ type AppContextValue = {
   refreshGroups: () => Promise<void>;
   selectGroup: (groupId: number | null) => void;
   updateUserPreference: (paymentMethod: PaymentMethod) => Promise<void>;
+  updateUserUpiId: (oldUpiId: string, newUpiId: string) => Promise<string>;
+  updateUserPassword: (oldPassword: string, newPassword: string) => Promise<string>;
+  sendPasswordResetOtp: (email: string) => Promise<string>;
+  resetPasswordWithOtp: (email: string, otp: string, newPassword: string) => Promise<string>;
 };
 
 const STORAGE_USER_KEY = 'splitwise.active-user';
@@ -156,6 +164,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  async function updateUserUpiId(oldUpiId: string, newUpiId: string) {
+    if (!currentUser?.email) {
+      throw new ApiError('Sign in first', 401);
+    }
+
+    const response = await updateUpiId({
+      userEmailId: currentUser.email,
+      oldUpiId: oldUpiId.trim(),
+      newUpiId: newUpiId.trim()
+    });
+
+    await refreshUsers();
+    return response;
+  }
+
+  async function updateUserPassword(oldPassword: string, newPassword: string) {
+    if (!currentUser?.email) {
+      throw new ApiError('Sign in first', 401);
+    }
+
+    const response = await updatePassword({
+      userEmailId: currentUser.email,
+      oldPassword: oldPassword.trim(),
+      newPassword: newPassword.trim()
+    });
+
+    await refreshUsers();
+    return response;
+  }
+
+  async function sendPasswordResetOtp(email: string) {
+    return sendForgotPasswordOtp({ email: email.trim() });
+  }
+
+  async function resetPasswordWithOtp(email: string, otp: string, newPassword: string) {
+    const response = await resetForgotPassword({
+      email: email.trim(),
+      otp: otp.trim(),
+      newPassword: newPassword.trim()
+    });
+
+    await refreshUsers();
+    return response;
+  }
+
   const value = useMemo<AppContextValue>(
     () => ({
       users,
@@ -169,7 +222,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshUsers,
       refreshGroups,
       selectGroup,
-      updateUserPreference
+      updateUserPreference,
+      updateUserUpiId,
+      updateUserPassword,
+      sendPasswordResetOtp,
+      resetPasswordWithOtp
     }),
     [groups, currentGroupId, currentUser, isBootstrapping, users]
   );
