@@ -138,3 +138,12 @@ export interface ApiErrorPayload {
   statusCode?: number;
   currTimeStamp?: string;
 }
+
+export interface GroupInvitation {
+  id: number;
+  groupId: number;
+  invitedUserId: number;
+  invitedByUserId: number;
+  status: string;
+  createdAt: string | null;
+}

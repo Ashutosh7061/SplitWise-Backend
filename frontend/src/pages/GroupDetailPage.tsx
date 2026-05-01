@@ -209,7 +209,7 @@ export function GroupDetailPage() {
         </article>
 
         <article className="panel-card">
-          <SectionHeader title="Invite member" subtitle="Add a registered user to this group." />
+          <SectionHeader title="Invite member" subtitle="Send an invitation — user must accept from Notifications." />
           <form className="stack" onSubmit={handleInvite}>
             <label>
               Email

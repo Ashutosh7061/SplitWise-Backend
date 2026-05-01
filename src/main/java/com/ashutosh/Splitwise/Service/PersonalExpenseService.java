@@ -2,9 +2,12 @@ package com.ashutosh.Splitwise.Service;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import com.ashutosh.Splitwise.Exception.InvalidBudgetAmountException;
 import org.springframework.stereotype.Service;
 
 import com.ashutosh.Splitwise.Dto.MonthlyBudgetRequestDto;
@@ -16,6 +19,7 @@ import com.ashutosh.Splitwise.Entity.MonthlyBudget;
 import com.ashutosh.Splitwise.Entity.PersonalExpense;
 import com.ashutosh.Splitwise.Entity.User;
 import com.ashutosh.Splitwise.Exception.DataNotFoundException;
+import com.ashutosh.Splitwise.Exception.InvalidBudgetAmountException;
 import com.ashutosh.Splitwise.Repository.MonthlyBudgetRepository;
 import com.ashutosh.Splitwise.Repository.PersonalExpenseRepository;
 import com.ashutosh.Splitwise.Repository.UserRepository;
@@ -149,7 +153,7 @@ public class PersonalExpenseService {
             throw new InvalidBudgetAmountException("Budget must be greater than 0");
         }
 
-        User user = userRepository.findById(request.getUserId())
+        userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Optional<MonthlyBudget> existingBudget = monthlyBudgetRepository

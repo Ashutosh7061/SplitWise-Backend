@@ -6,6 +6,7 @@ import { AddExpensePage } from './pages/AddExpensePage';
 import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { GroupDetailPage } from './pages/GroupDetailPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import { GroupsPage } from './pages/GroupsPage';
 import { LandingPage } from './pages/LandingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -42,6 +43,7 @@ export function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="groups" element={<GroupsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="groups/:groupId" element={<GroupDetailPage />} />
         <Route path="expenses/new" element={<AddExpensePage />} />
         <Route path="personal" element={<PersonalTrackingPage />} />

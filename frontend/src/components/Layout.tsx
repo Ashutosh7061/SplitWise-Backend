@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { BadgeIndianRupee, Coins, LayoutDashboard, LogOut, ReceiptText, ShieldPlus, Users } from 'lucide-react';
-import { getUserSummary } from '../api/splitwiseApi';
+import { BadgeIndianRupee, Coins, LayoutDashboard, LogOut, ReceiptText, ShieldPlus, Users, Bell } from 'lucide-react';
+import { getUserSummary, getInvitations } from '../api/splitwiseApi';
 import { useApp } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 
 const navItems = [
   { to: '/app', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/app/notifications', label: 'Notifications', icon: Bell },
   { to: '/app/groups', label: 'Groups', icon: Users },
   { to: '/app/expenses/new', label: 'Add Expense', icon: ReceiptText },
   { to: '/app/personal', label: 'Personal Tracking', icon: BadgeIndianRupee },
@@ -26,6 +27,7 @@ export function Layout() {
     ? 'Keep your budget and expenses separate from group bills.'
     : 'Track shared balances, settlements, and group expenses.';
   const [currentBalance, setCurrentBalance] = useState(0);
+  const [pendingInvites, setPendingInvites] = useState(0);
 
   useEffect(() => {
     async function loadCurrentBalance() {
@@ -43,6 +45,21 @@ export function Layout() {
     }
 
     void loadCurrentBalance();
+    async function loadInvites() {
+      if (!currentUser?.id) {
+        setPendingInvites(0);
+        return;
+      }
+
+      try {
+        const items = await getInvitations(currentUser.id);
+        setPendingInvites(Array.isArray(items) ? items.length : 0);
+      } catch {
+        setPendingInvites(0);
+      }
+    }
+
+    void loadInvites();
   }, [currentGroupId, currentUser?.email]);
 
   function handleLogout() {
@@ -66,6 +83,9 @@ export function Layout() {
             <NavLink key={to} to={to} end={end} className="nav-link">
               <Icon size={18} />
               <span>{label}</span>
+              {to === '/app/notifications' && pendingInvites > 0 ? (
+                <span className="nav-badge">{pendingInvites}</span>
+              ) : null}
             </NavLink>
           ))}
         </nav>

@@ -1,10 +1,10 @@
 package com.ashutosh.Splitwise.Repository;
 
-import com.ashutosh.Splitwise.Entity.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
+import com.ashutosh.Splitwise.Entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 

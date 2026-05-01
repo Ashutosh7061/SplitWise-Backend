@@ -314,7 +314,7 @@ public class GroupSummaryService {
 
         Long userId = user.getId();
 
-        Group group = groupRepository.findById(groupId)
+        groupRepository.findById(groupId)
                .orElseThrow(() -> new DataNotFoundException("Group not found"));
 
         GroupMembership membership = groupMembershipRepository

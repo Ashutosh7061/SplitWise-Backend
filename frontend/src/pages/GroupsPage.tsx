@@ -219,7 +219,7 @@ export function GroupsPage() {
         </article>
 
         <article className="panel-card">
-          <SectionHeader title="Invite member" subtitle="Add someone already registered in the system." />
+          <SectionHeader title="Invite member" subtitle="Send an invitation — user must accept from Notifications." />
           <form className="stack" onSubmit={handleInvite}>
             <label>
               Group

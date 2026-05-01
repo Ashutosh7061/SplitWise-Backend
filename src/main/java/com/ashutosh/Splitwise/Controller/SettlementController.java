@@ -1,13 +1,19 @@
 package com.ashutosh.Splitwise.Controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ashutosh.Splitwise.Dto.PaySettlementRequest;
 import com.ashutosh.Splitwise.Dto.SettlementDto;
-import com.ashutosh.Splitwise.Entity.Settlement;
 import com.ashutosh.Splitwise.Service.SettlementService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor

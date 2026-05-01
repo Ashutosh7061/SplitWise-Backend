@@ -1,19 +1,20 @@
 package com.ashutosh.Splitwise.Service;
 
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.ashutosh.Splitwise.Dto.SettlementDto;
 import com.ashutosh.Splitwise.Entity.Settlement;
 import com.ashutosh.Splitwise.Entity.User;
 import com.ashutosh.Splitwise.Enum.PaymentMethod;
+import com.ashutosh.Splitwise.Exception.InvalidPaymentMethodException;
 import com.ashutosh.Splitwise.Repository.SettlementRepository;
 import com.ashutosh.Splitwise.Repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.ashutosh.Splitwise.Exception.InvalidPaymentMethodException;
 
 @Service
 @RequiredArgsConstructor
@@ -56,8 +57,6 @@ public class SettlementService {
 
         User receiver = userRepository.findById(settlement.getToUserId())
                 .orElseThrow(()-> new RuntimeException("Receiver not found"));
-
-
 
         if("PAID".equals(settlement.getStatus())){
             return "Settlement already paid";

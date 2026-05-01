@@ -172,6 +172,16 @@ export async function addUserToGroup(payload: AddUserToGroupPayload) {
   });
 }
 
+export async function getInvitations(userId: number) {
+  return apiRequest<any[]>(`/groups/invitations?userId=${userId}`);
+}
+
+export async function acceptInvitation(invitationId: number) {
+  return apiRequest<string>(`/groups/invitation/${invitationId}/accept`, {
+    method: 'POST'
+  });
+}
+
 export async function removeUserFromGroup(payload: RemoveUserFromGroupPayload) {
   return apiRequest<string>('/groups/remove-user', {
     method: 'POST',
