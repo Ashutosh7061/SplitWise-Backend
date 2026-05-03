@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public class PaySettlementRequest {
 
     private PaymentMethod paymentMethod;
+    private String transactionId;
 
     public PaymentMethod getPaymentMethod() {
         return paymentMethod;
@@ -17,6 +18,11 @@ public class PaySettlementRequest {
         this.paymentMethod = paymentMethod;
     }
 
+    public String getTransactionId() {
+        return transactionId;
+    }
 
-
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
 }

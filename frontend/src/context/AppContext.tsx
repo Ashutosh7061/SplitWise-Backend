@@ -18,11 +18,13 @@ type AppContextValue = {
   currentUser: User | null;
   currentGroupId: number | null;
   isBootstrapping: boolean;
+  balanceRefreshToken: number;
   login: (email: string, password: string) => Promise<User>;
   signup: (payload: CreateUserPayload) => Promise<User>;
   logout: () => void;
   refreshUsers: () => Promise<void>;
   refreshGroups: () => Promise<void>;
+  refreshBalance: () => void;
   selectGroup: (groupId: number | null) => void;
   updateUserPreference: (paymentMethod: PaymentMethod) => Promise<void>;
   updateUserUpiId: (oldUpiId: string, newUpiId: string) => Promise<string>;
@@ -47,6 +49,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
+  const [balanceRefreshToken, setBalanceRefreshToken] = useState(0);
 
   async function refreshUsers() {
     const data = await getUsers();
@@ -62,6 +65,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   async function refreshGroups() {
     const data = await getGroups();
     setGroups(data);
+  }
+
+  function refreshBalance() {
+    setBalanceRefreshToken((value) => value + 1);
   }
 
   async function bootstrap() {
@@ -216,11 +223,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentUser,
       currentGroupId,
       isBootstrapping,
+      balanceRefreshToken,
       login,
       signup,
       logout,
       refreshUsers,
       refreshGroups,
+      refreshBalance,
       selectGroup,
       updateUserPreference,
       updateUserUpiId,
@@ -228,7 +237,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       sendPasswordResetOtp,
       resetPasswordWithOtp
     }),
-    [groups, currentGroupId, currentUser, isBootstrapping, users]
+    [balanceRefreshToken, groups, currentGroupId, currentUser, isBootstrapping, users]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

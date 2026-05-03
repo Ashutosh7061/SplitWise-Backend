@@ -12,6 +12,7 @@ import { LandingPage } from './pages/LandingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PersonalTrackingPage } from './pages/PersonalTrackingPage';
 import { SettlementDetailPage } from './pages/SettlementDetailPage';
+import { SettlementPage } from './pages/SettlementPage';
 import { SummaryPage } from './pages/SummaryPage';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -48,6 +49,7 @@ export function App() {
         <Route path="expenses/new" element={<AddExpensePage />} />
         <Route path="personal" element={<PersonalTrackingPage />} />
         <Route path="summary" element={<SummaryPage />} />
+        <Route path="settlement" element={<SettlementPage />} />
         <Route path="settlements/:settlementId" element={<SettlementDetailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

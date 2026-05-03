@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { BadgeIndianRupee, Coins, LayoutDashboard, LogOut, ReceiptText, ShieldPlus, Users, Bell } from 'lucide-react';
-import { getUserSummary, getInvitations } from '../api/splitwiseApi';
+import { BadgeIndianRupee, Coins, LayoutDashboard, LogOut, ReceiptText, ShieldPlus, Users, Bell, Handshake } from 'lucide-react';
+import { getUserSummary, getInvitations, getPaymentNotifications } from '../api/splitwiseApi';
 import { useApp } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 
@@ -12,11 +12,12 @@ const navItems = [
   { to: '/app/expenses/new', label: 'Add Expense', icon: ReceiptText },
   { to: '/app/personal', label: 'Personal Tracking', icon: BadgeIndianRupee },
   { to: '/app/summary', label: 'Summary', icon: Coins },
+  { to: '/app/settlement', label: 'Settlement', icon: Handshake },
   { to: '/auth', label: 'Account', icon: ShieldPlus }
 ];
 
 export function Layout() {
-  const { currentUser, currentGroupId, groups, logout } = useApp();
+  const { currentUser, currentGroupId, groups, logout, balanceRefreshToken } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
   const group = groups.find((item) => item.id === currentGroupId) || null;
@@ -27,7 +28,7 @@ export function Layout() {
     ? 'Keep your budget and expenses separate from group bills.'
     : 'Track shared balances, settlements, and group expenses.';
   const [currentBalance, setCurrentBalance] = useState(0);
-  const [pendingInvites, setPendingInvites] = useState(0);
+  const [pendingNotifications, setPendingNotifications] = useState(0);
 
   useEffect(() => {
     async function loadCurrentBalance() {
@@ -45,22 +46,29 @@ export function Layout() {
     }
 
     void loadCurrentBalance();
-    async function loadInvites() {
+    async function loadNotifications() {
       if (!currentUser?.id) {
-        setPendingInvites(0);
+        setPendingNotifications(0);
         return;
       }
 
       try {
-        const items = await getInvitations(currentUser.id);
-        setPendingInvites(Array.isArray(items) ? items.length : 0);
+        const [invites, payments] = await Promise.all([
+          getInvitations(currentUser.id),
+          getPaymentNotifications(currentUser.id)
+        ]);
+        const inviteCount = Array.isArray(invites) ? invites.length : 0;
+        const unconfirmedPayments = Array.isArray(payments) 
+          ? payments.filter((p) => p.status !== 'CONFIRMED').length 
+          : 0;
+        setPendingNotifications(inviteCount + unconfirmedPayments);
       } catch {
-        setPendingInvites(0);
+        setPendingNotifications(0);
       }
     }
 
-    void loadInvites();
-  }, [currentGroupId, currentUser?.email]);
+    void loadNotifications();
+  }, [balanceRefreshToken, currentGroupId, currentUser?.id]);
 
   function handleLogout() {
     logout();
@@ -83,8 +91,8 @@ export function Layout() {
             <NavLink key={to} to={to} end={end} className="nav-link">
               <Icon size={18} />
               <span>{label}</span>
-              {to === '/app/notifications' && pendingInvites > 0 ? (
-                <span className="nav-badge">{pendingInvites}</span>
+              {to === '/app/notifications' && pendingNotifications > 0 ? (
+                <span className="nav-badge">{pendingNotifications}</span>
               ) : null}
             </NavLink>
           ))}

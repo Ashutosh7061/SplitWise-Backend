@@ -11,21 +11,30 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-public class Settlement {
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentNotification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long fromUserId;
-    private Long toUserId;
+    private Long settlementId;
+    private Long receiverId;
+    private Long payerId;
+
+    private String payerName;
     private double amount;
+    private String transactionId;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -33,11 +42,14 @@ public class Settlement {
     @Enumerated(EnumType.STRING)
     private SettlementStatus status;
 
-    private Long groupId;
-    
-    private String transactionId;
+    @jakarta.persistence.Column(name = "is_read")
+    private boolean isRead = false;
 
     private LocalDateTime createdAt;
-    private LocalDateTime paidAt;
+    private LocalDateTime confirmedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

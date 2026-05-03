@@ -2,6 +2,7 @@ package com.ashutosh.Splitwise.Service;
 
 import com.ashutosh.Splitwise.Dto.SettlementDataDto;
 import com.ashutosh.Splitwise.Entity.*;
+import com.ashutosh.Splitwise.Enum.SettlementStatus;
 import com.ashutosh.Splitwise.Exception.DataNotFoundException;
 import com.ashutosh.Splitwise.Repository.*;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -56,8 +57,8 @@ public class ExpenseService {
     @Transactional
     public List<SettlementDataDto> calculateBalances(Long groupId, List<Long> userIds) {
 
-        // Rebuild unpaid settlements from current balances to avoid duplicate accumulation.
-        settlementRepository.deleteByGroupIdAndStatus(groupId, "UNPAID");
+        // Rebuild pending settlements from current balances to avoid duplicate accumulation.
+        settlementRepository.deleteByGroupIdAndStatus(groupId, SettlementStatus.PENDING);
 
         List<Expense> expenses = expenseRepository.findByGroupId(groupId);
         Map<Long, Double> netBalance = new HashMap<>();
@@ -88,9 +89,8 @@ public class ExpenseService {
         return expenseRepository.findByGroupId(groupId);
     }
 
-
     // -------- SPLIT METHODS --------
-            // ======== METHOD 1 - EQUALSPLIT==========
+            // ======== METHOD 1 - EQUAL SPLIT==========
     private void equalSplit(Expense expense, List<Long> userIds, Map<Long, Double> balance) {
         double splitAmount = expense.getAmount() / userIds.size();
 
@@ -104,7 +104,7 @@ public class ExpenseService {
     }
 
 
-        // =========== METHOD 2 - EXACTSPLIT ===============
+        // =========== METHOD 2 - EXACT SPLIT ===============
     private void exactSplit(Expense expense, Map<Long, Double> balance) {
         Map<Long, Double> splitMap = parseMap(expense.getSplitDetails());
 
@@ -121,7 +121,7 @@ public class ExpenseService {
     }
 
 
-        // ========== METHOD 3 - PERCENTAGESPLIT ==============
+        // ========== METHOD 3 - PERCENTAGE SPLIT ==============
     private void percentageSplit(Expense expense, Map<Long, Double> balance) {
         Map<Long, Double> percentMap = parseMap(expense.getSplitDetails());
 
@@ -171,7 +171,7 @@ public class ExpenseService {
             settlement.setFromUserId(debtor);
             settlement.setToUserId(creditor);
             settlement.setAmount(owe);
-            settlement.setStatus("UNPAID");
+            settlement.setStatus(SettlementStatus.PENDING);
             settlement.setGroupId(groupId);
             settlement.setCreatedAt(LocalDateTime.now());
 

@@ -14,7 +14,8 @@ import type {
   SettlementDto,
   TimeBasedGroupSummary,
   User,
-  UserGroupSummary
+  UserGroupSummary,
+  PaymentNotification
 } from '../types';
 
 export type CreateUserPayload = {
@@ -231,10 +232,40 @@ export async function getSettlement(settlementId: number) {
   return apiRequest<SettlementDto>(`/settlements/${settlementId}`);
 }
 
-export async function paySettlement(settlementId: number, paymentMethod: PaymentMethod) {
+export async function paySettlement(settlementId: number, paymentMethod: PaymentMethod, transactionId: string) {
   return apiRequest<string>(`/settlements/${settlementId}/pay`, {
     method: 'POST',
-    body: JSON.stringify({ paymentMethod })
+    body: JSON.stringify({ paymentMethod, transactionId })
+  });
+}
+
+export async function confirmSettlement(settlementId: number, receiverId: number) {
+  return apiRequest<string>(`/settlements/${settlementId}/confirm/${receiverId}`, {
+    method: 'POST'
+  });
+}
+
+export async function getPaymentNotifications(receiverId: number) {
+  return apiRequest<PaymentNotification[]>(`/payment-notifications/receiver/${receiverId}`);
+}
+
+export async function getUnreadPaymentNotifications(receiverId: number) {
+  return apiRequest<PaymentNotification[]>(`/payment-notifications/receiver/${receiverId}/unread`);
+}
+
+export async function getPaymentNotification(notificationId: number) {
+  return apiRequest<PaymentNotification>(`/payment-notifications/${notificationId}`);
+}
+
+export async function confirmPaymentNotification(settlementId: number, receiverId: number) {
+  return apiRequest<string>(`/payment-notifications/${settlementId}/confirm/${receiverId}`, {
+    method: 'POST'
+  });
+}
+
+export async function markPaymentNotificationAsRead(notificationId: number) {
+  return apiRequest<PaymentNotification>(`/payment-notifications/${notificationId}/read`, {
+    method: 'PUT'
   });
 }
 

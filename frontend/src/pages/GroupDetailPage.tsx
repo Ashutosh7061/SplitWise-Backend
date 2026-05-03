@@ -5,6 +5,7 @@ import { getBalances, getExpenses, getGroupAnalysis, getGroupMembers, getGroupSu
 import { ErrorDialog } from '../components/ErrorDialog';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
+import { SuccessToast } from '../components/SuccessToast';
 import { useApp } from '../context/AppContext';
 import { clampText, formatCurrency, formatDateTime } from '../utils/format';
 import type { Expense, GroupMember, SettlementData, SettlementDto, GroupSummary, TimeBasedGroupSummary } from '../types';
@@ -302,7 +303,7 @@ export function GroupDetailPage() {
         </article>
       </section>
 
-      {feedback ? <p className="notice success">{feedback}</p> : null}
+      <SuccessToast message={feedback} onClose={() => setFeedback(null)} />
       <ErrorDialog message={error} onClose={() => setError(null)} title="Group detail error" />
     </div>
   );

@@ -31,8 +31,14 @@ public class SettlementController {
     public String paySettlement(@PathVariable Long settlementId, @RequestBody PaySettlementRequest request){
         return settlementService.paySettlement(
                 settlementId,
-                request.getPaymentMethod()
+                request.getPaymentMethod(),
+                request.getTransactionId()
         );
+    }
+
+    @PostMapping("/{settlementId}/confirm/{receiverId}")
+    public String confirmSettlement(@PathVariable Long settlementId, @PathVariable Long receiverId){
+        return settlementService.confirmSettlement(settlementId, receiverId);
     }
 
     @GetMapping("/group/{groupId}")

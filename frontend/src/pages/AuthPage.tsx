@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, KeyRound, UserRoundPen } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Home, KeyRound, UserRoundPen } from 'lucide-react';
 import { ApiError } from '../api/client';
 import { ErrorDialog } from '../components/ErrorDialog';
 import { useApp } from '../context/AppContext';
@@ -37,6 +37,8 @@ export function AuthPage() {
   const [upiId, setUpiId] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('ONLINE');
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotOtp, setForgotOtp] = useState('');
@@ -52,6 +54,10 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const hasNextTarget = location.search.includes('next=');
+  const hasSignupPasswordMismatch =
+    mode === 'signup' &&
+    Boolean(password.trim() || confirmPassword.trim()) &&
+    password !== confirmPassword;
 
   useEffect(() => {
     if (currentUser) {
@@ -295,26 +301,51 @@ export function AuthPage() {
 
           <label className="wide">
             Password
-            <input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              type="password"
-              placeholder="Password"
-              required
-            />
+            <div className={hasSignupPasswordMismatch ? 'password-input error' : 'password-input'}>
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                aria-invalid={hasSignupPasswordMismatch}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((previous) => !previous)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </label>
 
           {mode === 'signup' ? (
             <>
               <label className="wide">
                 Confirm password
-                <input
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  type="password"
-                  placeholder="Repeat the password"
-                  required
-                />
+                <div className={hasSignupPasswordMismatch ? 'password-input error' : 'password-input'}>
+                  <input
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Repeat the password"
+                    aria-invalid={hasSignupPasswordMismatch}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowConfirmPassword((previous) => !previous)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    aria-pressed={showConfirmPassword}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {hasSignupPasswordMismatch ? <span className="field-error">Passwords do not match.</span> : null}
               </label>
 
               <label className="wide">
@@ -348,7 +379,7 @@ export function AuthPage() {
             </button>
           ) : null}
         </div>
-        <p className="field-hint">Use your email and password to sign in, or your email, password, and UPI ID to create a profile.</p>
+        <p className="field-hint">Sign in to manage groups and settlements, or create a profile with your UPI ID for faster paybacks.</p>
       </form>
     );
   }
@@ -508,7 +539,7 @@ export function AuthPage() {
             ? 'Manage your account settings from the account area and keep your profile details current.'
             : mode === 'forgot'
               ? 'Use your registered email to receive an OTP and reset access securely.'
-              : 'This release now supports password-protected accounts, personal expense tracking, and monthly budget setup.'}
+              : 'Track shared expenses, split bills fairly, and settle balances with friends, roommates, and teams.'}
         </p>
 
         {currentUser ? null : (
@@ -548,12 +579,30 @@ export function AuthPage() {
             </>
           ) : (
             <>
-              <h2>Landing page, dashboard, group management, expense entry, and settlement flow.</h2>
-              <ul>
-                <li>Professional split-expense UI</li>
-                <li>Group summaries and member management</li>
-                <li>Settlement history with payment actions</li>
-              </ul>
+              <div className="auth-side-graphic" aria-hidden="true">
+                <div className="graphic-glow" />
+                <div className="graphic-balance-card">
+                  <p>Total to settle</p>
+                  <strong>Rs. 12,480</strong>
+                  <span>Updated today</span>
+                </div>
+                <div className="graphic-flow-card">
+                  <span className="dot" />
+                  <span>4 active groups</span>
+                </div>
+              </div>
+
+              <div className="auth-side-copy">
+                <h2>One place to track shared bills, balances, and settlements.</h2>
+                <p>
+                  Add expenses in seconds, see who owes whom instantly, and close dues quickly with clear payment records.
+                </p>
+                <ul>
+                  <li>Create groups for trips, rent, food, and events</li>
+                  <li>Auto-calculate equal or custom splits per member</li>
+                  <li>Track pending settlements and payment confirmations</li>
+                </ul>
+              </div>
             </>
           )}
         </div>

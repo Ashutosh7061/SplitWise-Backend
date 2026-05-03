@@ -93,6 +93,21 @@ export interface SettlementDto {
   paidAt: string | null;
 }
 
+export interface PaymentNotification {
+  id: number;
+  settlementId: number;
+  receiverId: number;
+  payerId: number;
+  payerName: string;
+  amount: number;
+  transactionId: string;
+  paymentMethod: PaymentMethod;
+  status: string;
+  isRead: boolean;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
 export interface SettlementSummary {
   totalSettlements: number;
   paidSettlements: number;

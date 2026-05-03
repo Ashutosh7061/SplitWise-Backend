@@ -20,6 +20,7 @@ import com.ashutosh.Splitwise.Entity.Group;
 import com.ashutosh.Splitwise.Entity.GroupMembership;
 import com.ashutosh.Splitwise.Entity.Settlement;
 import com.ashutosh.Splitwise.Entity.User;
+import com.ashutosh.Splitwise.Enum.SettlementStatus;
 import com.ashutosh.Splitwise.Exception.DataNotFoundException;
 import com.ashutosh.Splitwise.Exception.InvalidTypeException;
 import com.ashutosh.Splitwise.Repository.ExpenseRepository;
@@ -40,6 +41,27 @@ public class GroupSummaryService {
     private final UserRepository userRepository;
     private final ExpenseService expenseService;
     private final GroupMembershipRepository groupMembershipRepository;
+
+        private Map<Long, Double> applyConfirmedSettlements(Long groupId, Map<Long, Double> netBalance) {
+                List<Settlement> settlements = settlementRepository.findByGroupId(groupId);
+
+                for (Settlement settlement : settlements) {
+                        if (settlement.getStatus() != SettlementStatus.CONFIRMED) {
+                                continue;
+                        }
+
+                        netBalance.put(
+                                        settlement.getFromUserId(),
+                                        netBalance.getOrDefault(settlement.getFromUserId(), 0.0) + settlement.getAmount()
+                        );
+                        netBalance.put(
+                                        settlement.getToUserId(),
+                                        netBalance.getOrDefault(settlement.getToUserId(), 0.0) - settlement.getAmount()
+                        );
+                }
+
+                return netBalance;
+        }
 
 
     public GroupSummaryDto getGroupSummary(Long groupId){
@@ -107,7 +129,7 @@ public class GroupSummaryService {
                     if (userIdStr.isBlank()) {
                         continue;
                     }
-                    userIdSet.add(Long.parseLong(userIdStr));
+                    userIdSet.add(Long.valueOf(userIdStr));
                 }
             }
         }
@@ -115,6 +137,7 @@ public class GroupSummaryService {
         List<Long> userIds = new ArrayList<>(userIdSet);
         // Calculate net balance correctly
         Map<Long, Double> netBalance = expenseService.calculateNetBalanceMap(groupId, userIds);
+        netBalance = applyConfirmedSettlements(groupId, netBalance);
 
         System.out.println("NET BALANCE FROM CALCULATION: " + netBalance);
 
@@ -146,7 +169,7 @@ public class GroupSummaryService {
         // Settlement Summary
         int total = settlements.size();
         int paid = (int)settlements.stream()
-                .filter(s -> "PAID".equals(s.getStatus()))
+                .filter(s -> SettlementStatus.PAID==(s.getStatus()))
                 .count();
 
         int unPaid = total - paid;
@@ -251,7 +274,7 @@ public class GroupSummaryService {
                         continue;
                     }
 
-                    userIdSet.add(Long.parseLong(userIdStr));
+                    userIdSet.add(Long.valueOf(userIdStr));
                 }
             }
         }
@@ -261,6 +284,7 @@ public class GroupSummaryService {
         // net balance
         Map<Long, Double> netBalance =
                 expenseService.calculateNetBalanceMap(groupId, userIds);
+        netBalance = applyConfirmedSettlements(groupId, netBalance);
 
         // build DTO
         List<UserExpenseSummaryDto> userSummaries = new ArrayList<>();
@@ -291,7 +315,7 @@ public class GroupSummaryService {
         // settlement summary
         int total = settlements.size();
         int paid = (int) settlements.stream()
-                .filter(s -> "PAID".equals(s.getStatus()))
+                .filter(s -> SettlementStatus.PAID.equals(s.getStatus()))
                 .count();
 
         int unPaid = total - paid;
