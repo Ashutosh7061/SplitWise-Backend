@@ -10,6 +10,20 @@ type Mode = 'login' | 'signup' | 'forgot';
 type AccountTab = 'upi' | 'password';
 type ForgotStep = 'request' | 'reset';
 
+const UPI_PATTERN = /^[a-zA-Z0-9._-]+@[a-zA-Z]+$/;
+
+function isValidEmail(email: string) {
+  return email.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function isValidUpiId(upiId: string) {
+  return UPI_PATTERN.test(upiId.trim());
+}
+
+function hasMinimumPasswordLength(passwordValue: string) {
+  return passwordValue.trim().length >= 8;
+}
+
 function readNextPath(search: string) {
   const params = new URLSearchParams(search);
   return params.get('next') || '/app';
@@ -89,6 +103,22 @@ export function AuthPage() {
 
     try {
       if (mode === 'signup') {
+        if (!name.trim()) {
+          throw new ApiError('Name is required', 400);
+        }
+
+        if (!isValidEmail(email)) {
+          throw new ApiError('Invalid email format', 400);
+        }
+
+        if (!hasMinimumPasswordLength(password)) {
+          throw new ApiError('Password must be at least 8 characters', 400);
+        }
+
+        if (!isValidUpiId(upiId)) {
+          throw new ApiError('Invalid UPI ID format', 400);
+        }
+
         if (password !== confirmPassword) {
           throw new ApiError('Passwords do not match', 400);
         }
@@ -96,6 +126,14 @@ export function AuthPage() {
         await signup({ name, email, upiId, password, preferredPaymentMethod: paymentMethod });
         setMessage('Profile created successfully.');
       } else {
+        if (!isValidEmail(email)) {
+          throw new ApiError('Invalid email format', 400);
+        }
+
+        if (!password.trim()) {
+          throw new ApiError('Password is required', 400);
+        }
+
         await login(email, password);
         setMessage('Signed in successfully.');
       }
@@ -115,10 +153,22 @@ export function AuthPage() {
 
     try {
       if (forgotStep === 'request') {
+        if (!isValidEmail(forgotEmail)) {
+          throw new ApiError('Invalid email format', 400);
+        }
+
         const response = await sendPasswordResetOtp(forgotEmail);
         setMessage(response);
         setForgotStep('reset');
       } else {
+        if (!forgotOtp.trim()) {
+          throw new ApiError('OTP is required', 400);
+        }
+
+        if (!hasMinimumPasswordLength(forgotNewPassword)) {
+          throw new ApiError('Password must be at least 8 characters', 400);
+        }
+
         if (forgotNewPassword !== forgotConfirmPassword) {
           throw new ApiError('Passwords do not match', 400);
         }
@@ -149,6 +199,14 @@ export function AuthPage() {
     setMessage(null);
 
     try {
+      if (!isValidUpiId(oldUpiId)) {
+        throw new ApiError('Invalid UPI ID format', 400);
+      }
+
+      if (!isValidUpiId(newUpiId)) {
+        throw new ApiError('Invalid UPI ID format', 400);
+      }
+
       if (newUpiId !== confirmNewUpiId) {
         throw new ApiError('UPI IDs do not match', 400);
       }
@@ -172,6 +230,10 @@ export function AuthPage() {
     setMessage(null);
 
     try {
+      if (!hasMinimumPasswordLength(newAccountPassword)) {
+        throw new ApiError('Password must be at least 8 characters', 400);
+      }
+
       if (newAccountPassword !== confirmAccountPassword) {
         throw new ApiError('Passwords do not match', 400);
       }

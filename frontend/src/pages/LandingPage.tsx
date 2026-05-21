@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeIndianRupee, ShieldCheck, Sparkles, Users2 } from 'lucide-react';
+import { ArrowRight, BadgeIndianRupee, Mail, ShieldCheck, Sparkles, Users2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const features = [
@@ -109,10 +109,30 @@ export function LandingPage() {
         </div>
       </section>
 
-      <div className="landing-footer">
-        <Sparkles size={16} />
-        <span>Professional frontend layer for the Spring Boot Splitwise backend</span>
-      </div>
+      <footer className="landing-footer" aria-label="FinNest footer">
+        <div className="footer-brand-block">
+          <div className="footer-brand">
+            <strong>FinNest</strong>
+            <p>Split bills, settle faster, and keep every group balance clear.</p>
+          </div>
+          <p className="footer-copy">FinNest helps friends, roommates, and teams manage shared expenses without the spreadsheet mess.</p>
+        </div>
+
+        <div className="footer-links-block">
+          <div>
+            <span className="footer-title">Support</span>
+            <a href="mailto:support@finnest.app">
+              <Mail size={14} />
+              support@finnest.app
+            </a>
+            <span>Available for shared living, trips, and teams</span>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>© 2026 FinNest. All rights reserved.</span>
+        </div>
+      </footer>
     </div>
   );
 }
