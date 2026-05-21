@@ -1,5 +1,6 @@
-import { ArrowRight, BadgeIndianRupee, Mail, ShieldCheck, Sparkles, Users2 } from 'lucide-react';
+import { ArrowRight, BadgeIndianRupee, Mail, MoonStar, ShieldCheck, Sparkles, SunMedium, Users2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 const features = [
   {
@@ -25,9 +26,33 @@ const features = [
 ];
 
 export function LandingPage() {
+  const { theme, toggleTheme } = useApp();
+
   return (
     <div className="landing-page">
       <section className="hero-card">
+        <div className="hero-card-topbar">
+          <div className="landing-brand" aria-label="FinNest">
+            <span className="landing-brand-mark" aria-hidden="true">
+              <Sparkles size={12} />
+            </span>
+            <span className="landing-brand-copy">
+              <strong>FinNest</strong>
+              <span>Shared expenses</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            className="button theme-toggle-button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <SunMedium size={16} /> : <MoonStar size={16} />}
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
+
         <div className="hero-copy">
           <p className="eyebrow">Modern shared-expense platform</p>
           <h1>Split every bill with clarity, speed, and a premium experience.</h1>

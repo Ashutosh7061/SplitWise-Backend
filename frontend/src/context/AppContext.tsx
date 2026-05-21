@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { ApiError } from '../api/client';
 import {
   createUser,
@@ -17,6 +17,7 @@ type AppContextValue = {
   groups: Group[];
   currentUser: User | null;
   currentGroupId: number | null;
+  theme: 'dark' | 'light';
   isBootstrapping: boolean;
   balanceRefreshToken: number;
   login: (email: string, password: string) => Promise<User>;
@@ -31,10 +32,12 @@ type AppContextValue = {
   updateUserPassword: (oldPassword: string, newPassword: string) => Promise<string>;
   sendPasswordResetOtp: (email: string) => Promise<string>;
   resetPasswordWithOtp: (email: string, otp: string, newPassword: string) => Promise<string>;
+  toggleTheme: () => void;
 };
 
 const STORAGE_USER_KEY = 'splitwise.active-user';
 const STORAGE_GROUP_KEY = 'splitwise.current-group';
+const STORAGE_THEME_KEY = 'splitwise.theme';
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
@@ -48,8 +51,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') {
+      return 'dark';
+    }
+
+    const storedTheme = window.localStorage.getItem(STORAGE_THEME_KEY);
+    return storedTheme === 'light' ? 'light' : 'dark';
+  });
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [balanceRefreshToken, setBalanceRefreshToken] = useState(0);
+
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem(STORAGE_THEME_KEY, theme);
+  }, [theme]);
 
   async function refreshUsers() {
     const data = await getUsers();
@@ -69,6 +86,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   function refreshBalance() {
     setBalanceRefreshToken((value) => value + 1);
+  }
+
+  function toggleTheme() {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
   }
 
   async function bootstrap() {
@@ -222,6 +243,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       groups,
       currentUser,
       currentGroupId,
+      theme,
       isBootstrapping,
       balanceRefreshToken,
       login,
@@ -235,9 +257,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateUserUpiId,
       updateUserPassword,
       sendPasswordResetOtp,
-      resetPasswordWithOtp
+      resetPasswordWithOtp,
+      toggleTheme
     }),
-    [balanceRefreshToken, groups, currentGroupId, currentUser, isBootstrapping, users]
+    [balanceRefreshToken, groups, currentGroupId, currentUser, isBootstrapping, theme, users]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

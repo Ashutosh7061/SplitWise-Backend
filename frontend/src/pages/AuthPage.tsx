@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Home, KeyRound, UserRoundPen } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Home, KeyRound, MoonStar, SunMedium, UserRoundPen } from 'lucide-react';
 import { ApiError } from '../api/client';
 import { ErrorDialog } from '../components/ErrorDialog';
 import { useApp } from '../context/AppContext';
@@ -35,6 +35,8 @@ export function AuthPage() {
     signup,
     currentUser,
     logout,
+    theme,
+    toggleTheme,
     sendPasswordResetOtp,
     resetPasswordWithOtp,
     updateUserUpiId,
@@ -393,7 +395,7 @@ export function AuthPage() {
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Repeat the password"
+                    placeholder="Re-enter the password"
                     aria-invalid={hasSignupPasswordMismatch}
                     required
                   />
@@ -456,15 +458,15 @@ export function AuthPage() {
 
           <div className="account-summary">
             <div className="account-summary-row">
-              <span>Email</span>
+              <span>Email : </span>
               <strong>{currentUser?.email}</strong>
             </div>
             <div className="account-summary-row">
-              <span>UPI ID</span>
+              <span>UPI ID : </span>
               <strong>{currentUser?.upiId || 'Not set'}</strong>
             </div>
             <div className="account-summary-row">
-              <span>Preferred payment</span>
+              <span>Preferred payment : </span>
               <strong>{currentUser?.preferredPaymentMethod || 'UNSET'}</strong>
             </div>
           </div>
@@ -584,6 +586,16 @@ export function AuthPage() {
             <ArrowLeft size={16} />
             Back
           </button>
+          <button
+            type="button"
+            className="button ghost theme-toggle-button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <SunMedium size={16} /> : <MoonStar size={16} />}
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
         </div>
 
         <p className="eyebrow">Workspace access</p>
@@ -633,10 +645,10 @@ export function AuthPage() {
           {currentUser ? (
             <>
               <h2>{currentUser.name}</h2>
-              <ul>
-                <li>Email: {currentUser.email}</li>
-                <li>UPI ID: {currentUser.upiId || 'Not set'}</li>
-                <li>Preferred payment: {currentUser.preferredPaymentMethod || 'UNSET'}</li>
+              <ul className="account-snapshot-list">
+                <li><span>Email:</span> <strong>{currentUser.email}</strong></li>
+                <li><span>UPI ID:</span> <strong>{currentUser.upiId || 'Not set'}</strong></li>
+                <li><span>Preferred payment:</span> <strong>{currentUser.preferredPaymentMethod || 'UNSET'}</strong></li>
               </ul>
             </>
           ) : (

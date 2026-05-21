@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { BadgeIndianRupee, Coins, LayoutDashboard, LogOut, ReceiptText, ShieldPlus, Users, Bell, Handshake } from 'lucide-react';
+import { BadgeIndianRupee, Bell, Coins, Handshake, LayoutDashboard, LogOut, MoonStar, ReceiptText, ShieldPlus, SunMedium, Users } from 'lucide-react';
 import { getUserSummary, getInvitations, getPaymentNotifications } from '../api/splitwiseApi';
 import { useApp } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
@@ -17,7 +17,7 @@ const navItems = [
 ];
 
 export function Layout() {
-  const { currentUser, currentGroupId, groups, logout, balanceRefreshToken } = useApp();
+  const { currentUser, currentGroupId, groups, logout, balanceRefreshToken, theme, toggleTheme } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
   const group = groups.find((item) => item.id === currentGroupId) || null;
@@ -108,7 +108,7 @@ export function Layout() {
               <strong>{group.name}</strong>
             </div>
           ) : null}
-          <button type="button" className="button ghost full" onClick={handleLogout}>
+          <button type="button" className="button full sidebar-signout-button" onClick={handleLogout}>
             <LogOut size={16} />
             Sign out
           </button>
@@ -129,6 +129,16 @@ export function Layout() {
               <span>{isPersonalWorkspace ? 'Personal tracking' : 'Current balance'}</span>
               <strong>{isPersonalWorkspace ? 'On' : formatCurrency(currentBalance)}</strong>
             </div>
+            <button
+              type="button"
+              className="button ghost theme-toggle-button"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            >
+              {theme === 'dark' ? <SunMedium size={16} /> : <MoonStar size={16} />}
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
             {isPersonalWorkspace ? (
               <button type="button" className="button ghost" onClick={() => navigate('/app')}>
                 <LayoutDashboard size={16} />

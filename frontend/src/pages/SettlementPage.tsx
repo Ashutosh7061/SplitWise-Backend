@@ -28,6 +28,8 @@ export function SettlementPage() {
     return groups;
   }, [groups, currentUser]);
 
+  const hasGroups = userGroups.length > 0;
+
   const selectedGroup = useMemo(() => userGroups.find((g) => g.id === currentGroupId) || null, [userGroups, currentGroupId]);
 
   // Load group members and settlements
@@ -130,57 +132,45 @@ export function SettlementPage() {
         />
 
         {/* Group Selector Dropdown */}
-        <div style={{ marginTop: '1.5rem' }} className="dropdown-container">
-          <div
-            className="dropdown-trigger"
-            onClick={() => setShowGroupDropdown(!showGroupDropdown)}
-            style={{
-              border: '1px solid var(--color-border)',
-              borderRadius: '8px',
-              padding: '12px 16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              cursor: 'pointer',
-              backgroundColor: 'var(--color-surface)',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}
+        <div className="settlement-group-selector">
+          <button
+            type="button"
+            className="settlement-group-trigger"
+            onClick={() => hasGroups && setShowGroupDropdown(!showGroupDropdown)}
+            aria-haspopup="listbox"
+            aria-expanded={showGroupDropdown}
+            disabled={!hasGroups}
           >
-            <span>{selectedGroup?.name || 'Select a group'}</span>
-            <ChevronDown size={18} style={{ transform: showGroupDropdown ? 'rotate(180deg)' : '', transition: 'transform 0.2s' }} />
-          </div>
+            <span className="settlement-group-label">{selectedGroup?.name || 'No groups available'}</span>
+            <span className="settlement-group-meta">
+              <span>{selectedGroup ? 'Current group' : 'Create or join a group'}</span>
+              <ChevronDown
+                size={18}
+                className={showGroupDropdown ? 'is-open' : ''}
+              />
+            </span>
+          </button>
 
           {showGroupDropdown && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                marginTop: '4px',
-                border: '1px solid var(--color-border)',
-                borderRadius: '8px',
-                backgroundColor: 'var(--color-surface)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                zIndex: 10
-              }}
-            >
-              {userGroups.map((group) => (
-                <div
-                  key={group.id}
-                  onClick={() => handleGroupSelect(group.id)}
-                  style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid var(--color-border)',
-                    cursor: 'pointer',
-                    backgroundColor: currentGroupId === group.id ? 'var(--color-highlight)' : 'transparent',
-                    fontWeight: currentGroupId === group.id ? '600' : '400'
-                  }}
-                >
-                  {group.name}
-                </div>
-              ))}
+            <div className="settlement-group-menu" role="listbox" aria-label="Select a group">
+              {hasGroups ? userGroups.map((group) => {
+                const isActive = currentGroupId === group.id;
+                return (
+                  <button
+                    key={group.id}
+                    type="button"
+                    className={isActive ? 'settlement-group-option active' : 'settlement-group-option'}
+                    onClick={() => handleGroupSelect(group.id)}
+                    role="option"
+                    aria-selected={isActive}
+                  >
+                    <span>{group.name}</span>
+                    {isActive ? <span className="settlement-group-option-badge">Active</span> : null}
+                  </button>
+                );
+              }) : (
+                <div className="settlement-group-empty">No groups available</div>
+              )}
             </div>
           )}
         </div>
