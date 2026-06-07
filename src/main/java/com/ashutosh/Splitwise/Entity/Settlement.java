@@ -1,11 +1,18 @@
 package com.ashutosh.Splitwise.Entity;
 
+import java.time.LocalDateTime;
+
 import com.ashutosh.Splitwise.Enum.PaymentMethod;
-import jakarta.persistence.*;
+import com.ashutosh.Splitwise.Enum.SettlementStatus;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,9 +30,12 @@ public class Settlement {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private SettlementStatus status;
 
     private Long groupId;
+    
+    private String transactionId;
 
     private LocalDateTime createdAt;
     private LocalDateTime paidAt;

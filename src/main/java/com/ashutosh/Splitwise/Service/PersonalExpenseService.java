@@ -1,22 +1,30 @@
 package com.ashutosh.Splitwise.Service;
 
-import com.ashutosh.Splitwise.Dto.*;
-import com.ashutosh.Splitwise.Entity.MonthlyBudget;
-import com.ashutosh.Splitwise.Entity.PersonalExpense;
-import com.ashutosh.Splitwise.Entity.User;
-import com.ashutosh.Splitwise.Exception.DataNotFoundException;
-import com.ashutosh.Splitwise.Repository.MonthlyBudgetRepository;
-import com.ashutosh.Splitwise.Repository.PersonalExpenseRepository;
-import com.ashutosh.Splitwise.Repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.ashutosh.Splitwise.Dto.MonthlyBudgetRequestDto;
+import com.ashutosh.Splitwise.Dto.MonthlyBudgetResponseDto;
+import com.ashutosh.Splitwise.Dto.PersonalExpenseRequestDto;
+import com.ashutosh.Splitwise.Dto.PersonalExpenseResponseDto;
+import com.ashutosh.Splitwise.Dto.PersonalExpenseSummaryDto;
+import com.ashutosh.Splitwise.Entity.MonthlyBudget;
+import com.ashutosh.Splitwise.Entity.PersonalExpense;
+import com.ashutosh.Splitwise.Entity.User;
+import com.ashutosh.Splitwise.Exception.DataNotFoundException;
+import com.ashutosh.Splitwise.Exception.InvalidBudgetAmountException;
+import com.ashutosh.Splitwise.Repository.MonthlyBudgetRepository;
+import com.ashutosh.Splitwise.Repository.PersonalExpenseRepository;
+import com.ashutosh.Splitwise.Repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -141,26 +149,45 @@ public class PersonalExpenseService {
 
     public String setBudget(MonthlyBudgetRequestDto request) {
 
-        userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new DataNotFoundException("User not found"));
+        if (request.getLimit() <= 0) {
+            throw new InvalidBudgetAmountException("Budget must be greater than 0");
+        }
 
-        MonthlyBudget budget = monthlyBudgetRepository
+        userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Optional<MonthlyBudget> existingBudget = monthlyBudgetRepository
                 .findByUserIdAndYearAndMonth(
                         request.getUserId(),
                         request.getYear(),
                         request.getMonth()
-                )
-                .orElse(new MonthlyBudget());
+                );
 
-        budget.setUserId(request.getUserId());
-        budget.setMonthlyLimit(request.getLimit());
-        budget.setYear(request.getYear());
-        budget.setMonth(request.getMonth());
+        MonthlyBudget budget;
 
-        monthlyBudgetRepository.save(budget);
+        //for updating limit
+        if (existingBudget.isPresent()) {
+            budget = existingBudget.get();
+            budget.setMonthlyLimit(request.getLimit());
 
-        return "Budget set successfully";
+            monthlyBudgetRepository.save(budget);
+
+            return "Budget updated successfully";
+        }
+        // for setting limit
+        else {
+            budget = new MonthlyBudget();
+            budget.setUserId(request.getUserId());
+            budget.setMonthlyLimit(request.getLimit());
+            budget.setYear(request.getYear());
+            budget.setMonth(request.getMonth());
+
+            monthlyBudgetRepository.save(budget);
+
+            return "Budget created successfully";
+        }
     }
+
 
     public MonthlyBudgetResponseDto getBudgetSummary(Long userId, int year, int month){
 

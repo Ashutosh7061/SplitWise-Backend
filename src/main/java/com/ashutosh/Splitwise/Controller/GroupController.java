@@ -2,6 +2,7 @@ package com.ashutosh.Splitwise.Controller;
 
 import com.ashutosh.Splitwise.Dto.GroupMemberDto;
 import com.ashutosh.Splitwise.Entity.Group;
+import com.ashutosh.Splitwise.Entity.GroupInvitation;
 import com.ashutosh.Splitwise.Repository.GroupRepository;
 import com.ashutosh.Splitwise.Service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,17 @@ public class GroupController {
     @GetMapping("/{groupId}/members")
     public List<GroupMemberDto> getGroupMembers(@PathVariable Long groupId) {
         return groupService.getGroupMembers(groupId);
+    }
+
+    // ------------ Invitation Part --------------
+
+    @GetMapping("/invitations")
+    public List<GroupInvitation> getInvites(@RequestParam Long userId) {
+        return groupService.getPendingInvitations(userId);
+    }
+
+    @PostMapping("/invitation/{id}/accept")
+    public String acceptInvite(@PathVariable Long id) {
+        return groupService.acceptInvitation(id);
     }
 }

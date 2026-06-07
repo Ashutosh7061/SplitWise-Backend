@@ -1,13 +1,16 @@
 package com.ashutosh.Splitwise.Service;
 
-import com.ashutosh.Splitwise.Entity.Settlement;
-import com.ashutosh.Splitwise.Entity.User;
-import com.ashutosh.Splitwise.Repository.SettlementRepository;
-import com.ashutosh.Splitwise.Repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.ashutosh.Splitwise.Entity.Settlement;
+import com.ashutosh.Splitwise.Entity.User;
+import com.ashutosh.Splitwise.Enum.SettlementStatus;
+import com.ashutosh.Splitwise.Repository.SettlementRepository;
+import com.ashutosh.Splitwise.Repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,7 @@ public class NotificationService {
 
     public String sendSettlementEmailToUsers(Long groupId){
 
-        List<Settlement> settlements = settlementRepository.findByGroupIdAndStatus(groupId, "UNPAID");
+        List<Settlement> settlements = settlementRepository.findByGroupIdAndStatus(groupId, SettlementStatus.PENDING);
 
         if(settlements.isEmpty()){
             return "No unpaid settlements found";

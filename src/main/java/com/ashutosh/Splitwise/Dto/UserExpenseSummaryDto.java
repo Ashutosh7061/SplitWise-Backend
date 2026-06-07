@@ -3,7 +3,6 @@ package com.ashutosh.Splitwise.Dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor

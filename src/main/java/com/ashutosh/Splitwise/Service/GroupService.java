@@ -1,21 +1,26 @@
 package com.ashutosh.Splitwise.Service;
 
-import com.ashutosh.Splitwise.Dto.GroupMemberDto;
-import com.ashutosh.Splitwise.Entity.Group;
-import com.ashutosh.Splitwise.Entity.GroupMembership;
-import com.ashutosh.Splitwise.Entity.User;
-import com.ashutosh.Splitwise.Exception.DataNotFoundException;
-import com.ashutosh.Splitwise.Repository.GroupMembershipRepository;
-import com.ashutosh.Splitwise.Repository.GroupRepository;
-import com.ashutosh.Splitwise.Repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.ashutosh.Splitwise.Dto.GroupMemberDto;
+import com.ashutosh.Splitwise.Entity.Group;
+import com.ashutosh.Splitwise.Entity.GroupInvitation;
+import com.ashutosh.Splitwise.Entity.GroupMembership;
+import com.ashutosh.Splitwise.Entity.User;
+import com.ashutosh.Splitwise.Exception.DataNotFoundException;
+import com.ashutosh.Splitwise.Exception.DuplicateDataException;
+import com.ashutosh.Splitwise.Repository.GroupInvitationRepository;
+import com.ashutosh.Splitwise.Repository.GroupMembershipRepository;
+import com.ashutosh.Splitwise.Repository.GroupRepository;
+import com.ashutosh.Splitwise.Repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +30,19 @@ public class GroupService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final UserRepository userRepository;
     private final ExpenseService expenseService;
+    private final GroupInvitationRepository groupInvitationRepository;
 
 
     public Group createGroup(String name, Long userId){
 
-        User user =userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(()-> new DataNotFoundException("User not found"));
+
+        Optional<Group> existingGroup = groupRepository.findByNameIgnoreCaseAndCreatedBy(name, userId);
+
+        if(existingGroup.isPresent()){
+            throw new DuplicateDataException("Group already exist with same name");
+        }
 
         Group group = new Group();
         group.setName(name);
@@ -52,29 +64,42 @@ public class GroupService {
     public String addUserToGroup(Long groupId, String email, Long adminUserId){
 
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(()-> new DataNotFoundException("Group not found"));
+                .orElseThrow(() -> new DataNotFoundException("Group not found"));
 
-        if(!group.getCreatedBy().equals(adminUserId)){
-            return "Only admin can add users";
+        if (!group.getCreatedBy().equals(adminUserId)) {
+            return "Only admin can invite users";
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new DataNotFoundException("User not registered"));
+                .orElseThrow(() -> new DataNotFoundException("User not registered"));
 
-        Optional<GroupMembership> existing = groupMembershipRepository.findByGroupIdAndUserIdAndLeftAtIsNull(groupId,user.getId());
+        // check already member
+        Optional<GroupMembership> existingMember =
+                groupMembershipRepository.findByGroupIdAndUserIdAndLeftAtIsNull(groupId, user.getId());
 
-        if(existing.isPresent()){
+        if (existingMember.isPresent()) {
             return "User already in group";
         }
 
-        GroupMembership membership = new GroupMembership();
-        membership.setGroupId(groupId);
-        membership.setUserId(user.getId());
-        membership.setJoinedAt(LocalDateTime.now());
+        // check already invited
+        Optional<GroupInvitation> existingInvite =
+                groupInvitationRepository.findByGroupIdAndInvitedUserId(groupId, user.getId());
 
-        groupMembershipRepository.save(membership);
+        if (existingInvite.isPresent()) {
+            return "User already invited";
+        }
 
-        return "User added successfully";
+        // create invitation instead of membership
+        GroupInvitation invitation = new GroupInvitation();
+        invitation.setGroupId(groupId);
+        invitation.setInvitedUserId(user.getId());
+        invitation.setInvitedByUserId(adminUserId);
+        invitation.setStatus("PENDING");
+        invitation.setCreatedAt(LocalDateTime.now());
+
+        groupInvitationRepository.save(invitation);
+
+        return "Invitation sent successfully";
     }
 
     public String removeUser(Long groupId, Long removeUserId, Long adminUserId) {
@@ -171,4 +196,34 @@ public class GroupService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<GroupInvitation> getPendingInvitations(Long userId) {
+        return groupInvitationRepository.findByInvitedUserIdAndStatus(userId, "PENDING");
+    }
+
+
+    public String acceptInvitation(Long invitationId) {
+
+        GroupInvitation invitation = groupInvitationRepository.findById(invitationId)
+                .orElseThrow(() -> new RuntimeException("Invitation not found"));
+
+        if (!"PENDING".equals(invitation.getStatus())) {
+            return "Invitation already processed";
+        }
+
+        // add to group membership
+        GroupMembership membership = new GroupMembership();
+        membership.setGroupId(invitation.getGroupId());
+        membership.setUserId(invitation.getInvitedUserId());
+        membership.setJoinedAt(LocalDateTime.now());
+
+        groupMembershipRepository.save(membership);
+
+        // update invitation
+        invitation.setStatus("ACCEPTED");
+        groupInvitationRepository.save(invitation);
+
+        return "Joined group successfully";
+    }
+
 }

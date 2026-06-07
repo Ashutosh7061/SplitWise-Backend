@@ -1,6 +1,7 @@
 package com.ashutosh.Splitwise.Dto;
 
 import com.ashutosh.Splitwise.Enum.PaymentMethod;
+import com.ashutosh.Splitwise.Enum.SettlementStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +18,8 @@ public class SettlementDto {
     private String from;
     private String to;
     private double amount;
-    private String status;
-    private PaymentMethod receiverPreferredMathod;
+    private SettlementStatus status;
+    private PaymentMethod receiverPreferredMethod;
 
     private LocalDateTime createdAt;
     private LocalDateTime paidAt;

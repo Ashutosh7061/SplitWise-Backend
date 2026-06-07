@@ -1,11 +1,9 @@
 package com.ashutosh.Splitwise.Dto;
 
-import com.ashutosh.Splitwise.Entity.User;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
 
 @AllArgsConstructor
 @Getter
